@@ -40,6 +40,11 @@ h1,h2,.display{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif}
 @keyframes spIn{from{opacity:0;transform:scale(.55) rotate(-8deg);filter:blur(10px)}to{opacity:1;transform:none;filter:none}}
 @keyframes spGlow{50%{box-shadow:0 0 70px color-mix(in srgb,var(--a1) 75%,transparent)}}
 @keyframes spUp{from{opacity:0;transform:translateY(10px)}to{opacity:.85;transform:none}}
+.bubble{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;transition:transform .12s}.bubble:active{transform:scale(.98)}
+.msg-del{background:#ffffff0d;border:1px dashed #ffffff22;border-radius:16px;font-style:italic;opacity:.75}
+.tick{font-size:11px;font-weight:700;letter-spacing:-3px;margin-left:6px;opacity:.9}.tick.read{color:#53bdeb;opacity:1}
+.ub{min-width:20px;height:20px;padding:0 6px;border-radius:99px;display:grid;place-items:center;background:var(--a1);color:#fff;font-size:11px;font-weight:800;box-shadow:0 2px 8px color-mix(in srgb,var(--a1) 55%,transparent)}
+select.field{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#a69ab8 50%),linear-gradient(135deg,#a69ab8 50%,transparent 50%);background-position:calc(100% - 18px) 55%,calc(100% - 13px) 55%;background-size:5px 5px;background-repeat:no-repeat}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -52,7 +57,7 @@ h1,h2,.display{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif}
 <section id="auth-screen" class="min-h-screen flex items-center justify-center p-4">
   <div class="glass w-full max-w-md rounded-[28px] p-6 sm:p-8 shadow-2xl">
     <img id="login-logo" alt="Aether Chat" class="mx-auto mb-3 h-28 w-28 rounded-[26px] shadow-lg shadow-purple-950/60">
-    <div class="text-center"><h1 class="sr-only">AETHER CHAT</h1><p class="text-xs text-purple-300 mt-1 mb-6">Dev Riitzy</p></div>
+    <div class="text-center"><h1 class="sr-only">AETHER CHAT</h1><p class="text-xs text-purple-300 mt-1 mb-6">Project Eksklusif Riixtz</p></div>
     <div class="grid grid-cols-2 gap-1 p-1 rounded-xl bg-black/25 mb-5">
       <button id="login-tab" class="rounded-lg py-2.5 text-sm font-semibold btn-primary" type="button">Masuk</button>
       <button id="register-tab" class="rounded-lg py-2.5 text-sm font-semibold muted" type="button">Daftar akun</button>
@@ -64,7 +69,7 @@ h1,h2,.display{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif}
       <button id="auth-submit" class="btn-primary w-full rounded-xl py-3.5 text-sm font-bold shadow-lg shadow-purple-950/40" type="submit">Masuk ke aplikasi</button>
       <button id="reset-password" type="button" class="w-full py-2 text-xs text-purple-300">Lupa password?</button>
     </form>
-    <p class="text-[10px] leading-relaxed muted text-center mt-4">Jangan Pernah Membagikan password ke Orang yang tidak kamu kenalin,Tetap Jaga Keamanan Akun Anda!</p>
+    <p class="text-[10px] leading-relaxed muted text-center mt-4">Gunakan konfigurasi Firebase milik project kamu. Jangan bagikan password atau kredensial rahasia.</p>
   </div>
 </section>
 
@@ -129,6 +134,7 @@ h1,h2,.display{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif}
       <div class="space-y-2">
         <button id="edit-name" class="panel w-full p-4 text-left text-sm">✏️ <span class="ml-2 font-semibold">Ubah nama profil</span><span class="float-right muted">›</span></button>
         <button id="change-password" class="panel w-full p-4 text-left text-sm">🔒 <span class="ml-2 font-semibold">Ubah password</span><span class="float-right muted">›</span></button>
+        <div class="panel p-4 space-y-3"><h3 class="text-sm font-bold">Privasi</h3><label class="block text-xs muted">Terakhir dilihat<select id="priv-lastseen" class="field w-full rounded-xl px-3 py-2.5 text-sm mt-1"><option value="all">Semua orang</option><option value="contacts">Kontak saya</option><option value="nobody">Tidak ada</option></select></label><label class="block text-xs muted">Siapa yang bisa melihat status saya<select id="priv-status" class="field w-full rounded-xl px-3 py-2.5 text-sm mt-1"><option value="all">Semua orang</option><option value="contacts">Kontak saya</option><option value="nobody">Tidak ada</option></select></label><label class="block text-xs muted">Profil<select id="priv-profile" class="field w-full rounded-xl px-3 py-2.5 text-sm mt-1"><option value="public">Publik</option><option value="private">Privat (hanya kontak)</option></select></label><p class="text-[11px] muted">Kontak = orang yang punya chat pribadi denganmu. Profil privat menyembunyikan fotomu dari orang lain.</p></div>
         <div class="panel p-4 space-y-3"><h3 class="text-sm font-bold">Tema</h3><div id="theme-row" class="flex gap-2"></div></div>
         <div id="dev-panel" class="hidden panel p-4 space-y-2 border-amber-400/30"><h3 class="text-sm font-bold text-amber-300">Mode Developer</h3><p class="text-[11px] muted">Lihat semua pengguna dan kelola akun mereka.</p><button id="dev-users" type="button" class="btn-primary w-full rounded-xl py-3 text-xs font-bold">Kelola semua pengguna</button></div>
         <button id="share-id" class="panel w-full p-4 text-left text-sm">🔗 <span class="ml-2 font-semibold">Bagikan kode unik</span><span class="float-right muted">›</span></button>
@@ -243,7 +249,7 @@ const escapeError = err => {
 let auth=null, db=null, currentUser=null, myUserData=null;
 let authMode='login', currentView='chat', currentRoomID=null, currentRoomType='global';
 let currentRoomTitle='', currentTargetUid=null, selectedBg='violet', viewedStory=null, sending=false;
-let unsub={auth:null,stories:null,channels:null,privateRooms:null,messages:null,contacts:null};
+let unsub={auth:null,stories:null,channels:null,privateRooms:null,messages:null,contacts:null,peer:null};
 let storyCache=[], channelCache=[], privateRoomCache=[];
 let activeFilter='all', appGeneration=0, currentChannelObj=null;
 const contactNames={},userCache={},userPending=new Set(),lastSeen={};
@@ -255,6 +261,63 @@ const mk=(t,c,x)=>{const n=document.createElement(t);if(c)n.className=c;if(x!=nu
 const vbadge=()=>{const b=mk('span','vbadge','✓');b.title='Terverifikasi';return b;};
 const followerCount=c=>new Set([...(Array.isArray(c.followers)?c.followers:[]),c.creatorUid].filter(Boolean)).size;
 const isFollowing=c=>!!(c&&currentUser&&(c.creatorUid===currentUser.uid||(Array.isArray(c.followers)&&c.followers.includes(currentUser.uid))));
+let msgDocs=[],presenceTimer=null,readTimer=0,readTO=null,msgBusy=false;const deliverSent=new Set();
+const hasChatWith=uid=>privateRoomCache.some(r=>Array.isArray(r.users)&&r.users.includes(uid));
+function canSee(uid,key) {
+  if(!currentUser||uid===currentUser.uid||isDev) return true;
+  const u=userCache[uid];if(!u) return false;
+  const v=key==='profile'?((u.privProfile||'public')==='public'?'all':'contacts'):(u[key==='status'?'privStatus':'privLastSeen']||'all');
+  return v==='all'||(v==='contacts'&&hasChatWith(uid));
+}
+function pingPresence() {
+  if(!currentUser||document.hidden) return;
+  db.collection('users').doc(currentUser.uid).update({lastSeen:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});
+  if(currentRoomType==='private') updateRoomChrome();
+}
+function stopPresence() {clearInterval(presenceTimer);presenceTimer=null;}
+function startPresence() {stopPresence();pingPresence();presenceTimer=setInterval(pingPresence,60000);}
+function peerStatus(uid) {
+  const u=userCache[uid];if(!u||!canSee(uid,'lastSeen')) return '';
+  const ms=timestampMs(u.lastSeen);if(!ms) return '';
+  return Date.now()-ms<100000?'online':'terakhir dilihat '+formatRelative(u.lastSeen).toLowerCase();
+}
+function markRead() {
+  if(currentRoomType!=='private'||!currentRoomID||document.hidden||!currentUser) return;
+  const now=Date.now();
+  if(now-readTimer<1500){clearTimeout(readTO);readTO=setTimeout(markRead,1600);return;}
+  readTimer=now;const me=currentUser.uid;
+  db.collection('private_rooms').doc(currentRoomID).update({['unread.'+me]:0,['lastRead.'+me]:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});
+}
+function onLongPress(el,fn) {
+  let t=null;const stop=()=>clearTimeout(t);
+  el.addEventListener('pointerdown',()=>{t=setTimeout(()=>{t=null;fn();},450);});
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev,stop));
+  el.addEventListener('contextmenu',e=>{e.preventDefault();stop();fn();});
+}
+async function msgActions(doc,m,mine) {
+  if(msgBusy) return;msgBusy=true;
+  try {
+    const acts=[];
+    if(!m.deleted) acts.push({key:'copy',label:'Salin'});
+    if(mine&&!m.deleted) acts.push({key:'edit',label:'Edit pesan'});
+    acts.push({key:'me',label:'Hapus untuk saya'});
+    if(mine&&!m.deleted) acts.push({key:'all',label:'Hapus untuk semua orang',danger:true});
+    const r=await openForm({title:'Pesan',desc:m.deleted?'Pesan dihapus':safeText(m.text,'').slice(0,80),actions:acts});
+    if(!r||!r.action) return;
+    const SV=firebase.firestore.FieldValue.serverTimestamp();
+    if(r.action==='copy'){try{await navigator.clipboard.writeText(m.text);toast('Pesan disalin.');}catch(e){toast('Gagal menyalin.',true);}}
+    else if(r.action==='edit'){
+      const v=await openForm({title:'Edit pesan',fields:[{key:'text',label:'Pesan',value:safeText(m.text,''),min:1,max:2000,multiline:true}],confirmLabel:'Simpan'});
+      if(v&&v.text!==m.text){await doc.ref.update({text:v.text,edited:true,editedAt:SV});toast('Pesan diedit.');}
+    }
+    else if(r.action==='me'){await doc.ref.update({hiddenFor:firebase.firestore.FieldValue.arrayUnion(currentUser.uid)});toast('Pesan dihapus untuk kamu.');}
+    else if(r.action==='all'){
+      const ok=await openForm({title:'Hapus untuk semua orang?',desc:'Pesan ini akan hilang dari chat semua orang.',confirmLabel:'Hapus',danger:true});
+      if(ok){await doc.ref.update({deleted:true,text:'',deletedAt:SV});toast('Pesan dihapus untuk semua orang.');}
+    }
+  } catch(err){toast('Aksi gagal. '+escapeError(err),true);}
+  finally{msgBusy=false;}
+}
 const myStories=()=>storyCache.filter(s=>s.uid===currentUser.uid).slice().reverse();
 const THEMES=[['aether','Aether','#9333ea'],['samudra','Samudra','#2563eb'],['rimba','Rimba','#059669'],['senja','Senja','#e11d48']];
 function applyTheme(k) {
@@ -428,7 +491,7 @@ const liveChannel=()=>channelCache.find(c=>c.id===currentRoomID)||currentChannel
 function updateRoomChrome() {
   const isCh=currentRoomType==='channel', c=isCh?liveChannel():null, admin=isCh&&isChannelAdmin(c), rt=$('room-title');
   if(isCh){rt.textContent=safeText(c&&c.name,'Saluran');$('room-subtitle').textContent=(admin?'Kamu admin, ':'')+followerCount(c||{})+' pengikut';}
-  else if(currentRoomType==='private'){rt.textContent=personName(currentTargetUid,currentRoomTitle);if(userCache[currentTargetUid]&&userCache[currentTargetUid].verified)rt.appendChild(vbadge());}
+  else if(currentRoomType==='private'){rt.textContent=personName(currentTargetUid,currentRoomTitle);if(userCache[currentTargetUid]&&userCache[currentTargetUid].verified)rt.appendChild(vbadge());$('room-subtitle').textContent=peerStatus(currentTargetUid)||'Chat pribadi';}
   $('message-form').classList.toggle('hidden',isCh&&!admin);
   $('readonly-bar').classList.toggle('hidden',!isCh||admin);
   $('message-input').placeholder=isCh?'Tulis pesan untuk saluran…':'Tulis pesan…';
@@ -534,6 +597,7 @@ function renderProfile() {
   $('profile-bio').textContent=safeText(myUserData.bio,'Pengguna Aether Chat');
   const strip=$('my-story-shortcut').querySelector('.avatar');
   paintAvatar(strip,name,myUserData.photo);
+  $('priv-lastseen').value=myUserData.privLastSeen||'all';$('priv-status').value=myUserData.privStatus||'all';$('priv-profile').value=myUserData.privProfile||'public';
 }
 async function authSubmit(e) {
   e.preventDefault();
@@ -577,10 +641,12 @@ async function openRoom(roomID,type,title,subtitle='',targetUid=null) {
   $('room-screen').classList.remove('hidden');
   $('message-input').value='';
   if(type==='channel') syncChannelAccess(); else listenMessages(roomID,type);
+  stopListener('peer');
+  if(type==='private'&&targetUid){unsub.peer=db.collection('users').doc(targetUid).onSnapshot(sn=>{if(sn.exists){userCache[targetUid]=sn.data()||{};updateRoomChrome();renderPrivateRooms();}},()=>{});markRead();}
 }
 function closeRoom() {
   $('room-screen').classList.add('hidden');
-  stopListener('messages');
+  stopListener('messages');stopListener('peer');msgDocs=[];
   currentRoomID=null;currentTargetUid=null;currentChannelObj=null;
 }
 function dayLabel(ts) {
@@ -590,33 +656,46 @@ function dayLabel(ts) {
 }
 function listenMessages(roomID,type) {
   stopListener('messages');
-  const box=$('room-messages');box.replaceChildren();box.dataset.loaded='';
-  const query=roomRef(roomID,type).orderBy('timestamp','asc').limitToLast(200);
-  unsub.messages=query.onSnapshot(snap=>{
+  const box=$('room-messages');box.replaceChildren();box.dataset.loaded='';msgDocs=[];
+  unsub.messages=roomRef(roomID,type).orderBy('timestamp','asc').limitToLast(200).onSnapshot(snap=>{
     if(currentRoomID!==roomID) return;
-    const near=box.scrollHeight-box.scrollTop-box.clientHeight<140, first=box.dataset.loaded!=='1';
-    const frag=document.createDocumentFragment();
-    if(type==='channel'){
-      const c=liveChannel()||{}, intro=document.createElement('div');intro.className='chan-intro';
-      const t=document.createElement('strong');t.className='text-sm display block';t.textContent=safeText(c.name,'Saluran');
-      const d=document.createElement('p');d.className='text-[11px] muted mt-1 whitespace-pre-line';d.textContent=(c.description?c.description+'\n':'')+'Hanya admin saluran yang bisa mengirim pesan di sini.';
-      intro.append(t,d);frag.appendChild(intro);
-    }
-    let prevUid=null,prevDay='',lastMine=false;
-    snap.forEach(doc=>{
-      const m=doc.data()||{}, mine=m.senderUid===currentUser.uid, day=dayLabel(m.timestamp);
-      if(day!==prevDay){const sep=document.createElement('div');sep.className='day-sep';sep.textContent=day;frag.appendChild(sep);prevDay=day;prevUid=null;}
-      const wrap=document.createElement('div');wrap.className='flex flex-col '+(mine?'items-end':'items-start');
-      if(!mine&&type!=='private'&&m.senderUid!==prevUid){const label=document.createElement('span');label.className='text-[10px] muted px-1 mb-1';label.textContent=safeText(m.senderName,'Pengguna');wrap.appendChild(label);}
-      const bubble=document.createElement('div');bubble.className='bubble max-w-[86%] px-3.5 py-2 text-sm '+(mine?'msg-mine text-white':'msg-other');
-      bubble.appendChild(document.createTextNode(safeText(m.text,'')));
-      const tm=document.createElement('span');tm.className='t';tm.textContent=formatTime(m.timestamp);bubble.appendChild(tm);
-      wrap.appendChild(bubble);frag.appendChild(wrap);prevUid=m.senderUid;lastMine=mine;
-    });
-    if(snap.empty){const e=document.createElement('p');e.className='text-xs muted text-center py-6';e.textContent=type==='channel'?'Belum ada pesan di saluran ini.':'Belum ada pesan. Mulai percakapan!';frag.appendChild(e);}
-    box.replaceChildren(frag);box.dataset.loaded='1';
-    if(first||near||lastMine) box.scrollTop=box.scrollHeight;
+    msgDocs=snap.docs;renderMessageList();
+    const last=snap.docs[snap.docs.length-1];
+    if(type==='private'&&last&&(last.data()||{}).senderUid!==currentUser.uid) markRead();
   },err=>{console.error(err);toast('Gagal memuat pesan: '+escapeError(err),true);});
+}
+function renderMessageList() {
+  const box=$('room-messages'), type=currentRoomType, roomID=currentRoomID;if(!roomID) return;
+  const near=box.scrollHeight-box.scrollTop-box.clientHeight<140, first=box.dataset.loaded!=='1', frag=document.createDocumentFragment();
+  if(type==='channel') {
+    const c=liveChannel()||{}, intro=mk('div','chan-intro');
+    intro.append(mk('strong','text-sm display block',safeText(c.name,'Saluran')),mk('p','text-[11px] muted mt-1 whitespace-pre-line',(c.description?c.description+'\n':'')+'Hanya admin saluran yang bisa mengirim pesan di sini.'));
+    frag.appendChild(intro);
+  }
+  const prm=type==='private'?(privateRoomCache.find(r=>r.id===roomID)||{}):{}, peer=currentTargetUid;
+  const readMs=timestampMs(prm.lastRead&&prm.lastRead[peer]), delMs=timestampMs(prm.lastDelivered&&prm.lastDelivered[peer]);
+  let prevUid=null,prevDay='',lastMine=false,shown=0;
+  msgDocs.forEach(doc=>{
+    const m=doc.data()||{};
+    if(Array.isArray(m.hiddenFor)&&m.hiddenFor.includes(currentUser.uid)) return;
+    shown++;
+    const mine=m.senderUid===currentUser.uid, day=dayLabel(m.timestamp);
+    if(day!==prevDay){frag.appendChild(mk('div','day-sep',day));prevDay=day;prevUid=null;}
+    const wrap=mk('div','flex flex-col '+(mine?'items-end':'items-start'));
+    if(!mine&&type!=='private'&&m.senderUid!==prevUid) wrap.appendChild(mk('span','text-[10px] muted px-1 mb-1',safeText(m.senderName,'Pengguna')));
+    const bubble=mk('div','bubble max-w-[86%] px-3.5 py-2 text-sm '+(m.deleted?'msg-del':mine?'msg-mine text-white':'msg-other'));
+    bubble.appendChild(document.createTextNode(m.deleted?'🚫 Pesan ini telah dihapus':safeText(m.text,'')));
+    const t=mk('span','t',(m.edited&&!m.deleted?'diedit  ':'')+formatTime(m.timestamp));
+    if(mine&&type==='private'&&!m.deleted) {
+      const ms=timestampMs(m.timestamp);
+      t.appendChild(mk('span','tick'+(ms&&ms<=readMs?' read':''),!ms?'🕓':(ms<=delMs||ms<=readMs)?'✓✓':'✓'));
+    }
+    bubble.appendChild(t);onLongPress(bubble,()=>msgActions(doc,m,mine));
+    wrap.appendChild(bubble);frag.appendChild(wrap);prevUid=m.senderUid;lastMine=mine;
+  });
+  if(!shown) frag.appendChild(mk('p','text-xs muted text-center py-6',type==='channel'?'Belum ada pesan di saluran ini.':'Belum ada pesan. Mulai percakapan!'));
+  box.replaceChildren(frag);box.dataset.loaded='1';
+  if(first||near||lastMine) box.scrollTop=box.scrollHeight;
 }
 function formatTime(ts) {
   if(!ts || typeof ts.toDate!=='function') return 'baru saja';
@@ -633,7 +712,14 @@ async function sendMessage(e) {
     const data={text,senderUid:currentUser.uid,senderName:safeText(myUserData.name,'Pengguna'),timestamp:firebase.firestore.FieldValue.serverTimestamp()};
     if(currentRoomType==='private') data.roomID=currentRoomID;
     await roomRef(currentRoomID,currentRoomType).add(data);
-    if(currentRoomType!=='global') { try {await db.collection(currentRoomType==='channel'?'channels':'private_rooms').doc(currentRoomID).update({lastText:text.slice(0,80),lastSenderUid:currentUser.uid,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});} catch(e){console.warn(e);} }
+
+    if(currentRoomType!=='global') {
+      try {
+        const upd={lastText:text.slice(0,80),lastSenderUid:currentUser.uid,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+        if(currentRoomType==='private'&&currentTargetUid) upd['unread.'+currentTargetUid]=firebase.firestore.FieldValue.increment(1);
+        await db.collection(currentRoomType==='channel'?'channels':'private_rooms').doc(currentRoomID).update(upd);
+      } catch(e){console.warn(e);}
+    }
     $('message-input').value='';
   } catch(err) {console.error(err);toast('Pesan gagal dikirim. '+escapeError(err),true);}
   finally {sending=false;setBusy($('send-message'),false);}
@@ -683,7 +769,14 @@ function listenPrivateRooms() {
     privateRoomCache=[];
     snap.forEach(doc=>privateRoomCache.push({id:doc.id,...doc.data()}));
     watchChanges(snap,d=>{fetchUser(d.lastSenderUid);return personName(d.lastSenderUid,'Pesan baru');});
+    snap.forEach(doc=>{
+      const d=doc.data()||{}, ms=timestampMs(d.updatedAt), key=doc.id+':'+ms;
+      if(d.lastSenderUid&&d.lastSenderUid!==currentUser.uid&&ms&&ms>timestampMs(d.lastDelivered&&d.lastDelivered[currentUser.uid])&&!deliverSent.has(key)){
+        deliverSent.add(key);doc.ref.update({['lastDelivered.'+currentUser.uid]:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});
+      }
+    });
     renderPrivateRooms();
+    if(currentRoomType==='private'&&currentRoomID) renderMessageList();
   },err=>{console.error(err);toast('Daftar chat pribadi gagal dimuat.',true);});
 }
 function formatListTime(ts) {
@@ -691,21 +784,24 @@ function formatListTime(ts) {
   const d=ts.toDate(), n=new Date();
   return d.toDateString()===n.toDateString()?d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('id-ID',{day:'numeric',month:'short'});
 }
-function chatRow(avatarText,roundClass,name,metaNode,descText,onClick,photo,verified) {
-  const btn=document.createElement('button');btn.type='button';btn.className='panel w-full p-3 flex items-center gap-3 text-left';
-  const av=document.createElement('span');av.className='avatar w-11 h-11 '+roundClass;paintAvatar(av,avatarText,photo);
-  const body=document.createElement('span');body.className='flex-1 min-w-0';
-  const top=document.createElement('span');top.className='flex justify-between items-center gap-2';
-  const nm=document.createElement('strong');nm.className='text-xs truncate';nm.textContent=name;if(verified)nm.appendChild(vbadge());top.append(nm,metaNode);
-  const desc=document.createElement('span');desc.className='block text-[11px] muted mt-1 truncate';desc.textContent=descText;
-  body.append(top,desc);btn.append(av,body);btn.addEventListener('click',onClick);return btn;
+function chatRow(avatarText,roundClass,name,metaNode,descText,onClick,photo,verified,unreadN) {
+  const btn=mk('button','panel w-full p-3 flex items-center gap-3 text-left');btn.type='button';
+  const av=mk('span','avatar w-12 h-12 shrink-0 '+roundClass);paintAvatar(av,avatarText,photo);
+  const body=mk('span','flex-1 min-w-0'), top=mk('span','flex justify-between items-center gap-2'), nm=mk('strong','text-[13px] truncate',name);
+  if(verified) nm.appendChild(vbadge());
+  if(unreadN>0){metaNode.classList.remove('muted');metaNode.style.color='var(--lilac)';}
+  top.append(nm,metaNode);
+  const bot=mk('span','flex items-center gap-2 mt-1'), desc=mk('span','flex-1 min-w-0 truncate text-[12px] '+(unreadN>0?'text-white font-semibold':'muted'),descText);
+  bot.appendChild(desc);
+  if(unreadN>0) bot.appendChild(mk('span','ub',unreadN>99?'99+':String(unreadN)));
+  body.append(top,bot);btn.append(av,body);btn.addEventListener('click',onClick);return btn;
 }
 function metaText(t) {const n=document.createElement('span');n.className='text-[10px] muted shrink-0';n.textContent=t;return n;}
 function privateRow(r) {
   const targetUid=r.users.find(uid=>uid!==currentUser.uid);fetchUser(targetUid);
   const name=personName(targetUid,safeText(r.userNames&&r.userNames[targetUid],'Teman'));
   const desc=r.lastText?((r.lastSenderUid===currentUser.uid?'Kamu: ':'')+r.lastText):'Buka percakapan';
-  return chatRow(name,'rounded-full',name,metaText(formatListTime(r.updatedAt)),desc,()=>openRoom(r.id,'private',name,'Chat pribadi',targetUid),userCache[targetUid]&&userCache[targetUid].photo,userCache[targetUid]&&userCache[targetUid].verified);
+  return chatRow(name,'rounded-full',name,metaText(formatListTime(r.updatedAt)),desc,()=>openRoom(r.id,'private',name,'Chat pribadi',targetUid),canSee(targetUid,'profile')&&userCache[targetUid]&&userCache[targetUid].photo,userCache[targetUid]&&userCache[targetUid].verified,currentRoomID===r.id?0:((r.unread&&r.unread[currentUser.uid])||0));
 }
 function channelRow(c) {
   const name=safeText(c.name,'Saluran'), fol=isFollowing(c);let meta;
@@ -784,10 +880,10 @@ function renderStatuses() {
   storyCache.slice().reverse().forEach(s=>{if(s.uid!==currentUser.uid)(groups[s.uid]=groups[s.uid]||[]).push(s);});
   if(myUserData) paintAvatar($('my-status-avatar'),safeText(myUserData.name,'U'),myUserData.photo);
   $('my-status-sub').textContent=mine.length?mine.length+' status aktif, '+formatRelative(mine[mine.length-1].createdAt):'Ketuk untuk membuat status';
-  const ids=Object.keys(groups);
+  const ids=Object.keys(groups).filter(uid=>{fetchUser(uid);return canSee(uid,'status');});
   ids.forEach(uid=>{
     const list=groups[uid], last=list[list.length-1], name=personName(uid,safeText(last.userName,'Pengguna')), bg=bgClasses[last.bgKey]||bgClasses.violet;
-    fetchUser(uid);const ph=userCache[uid]&&userCache[uid].photo;
+    fetchUser(uid);const ph=canSee(uid,'profile')&&userCache[uid]&&userCache[uid].photo;
     const sm=mk('button','min-w-[66px] text-center'),av=mk('span','avatar mx-auto w-14 h-14 rounded-full border-2 border-purple-400');sm.type='button';paintAvatar(av,name,ph);
     sm.append(av,mk('span','block text-[10px] mt-1 max-w-[66px] truncate',name));sm.addEventListener('click',()=>viewStatusList(list));strip.appendChild(sm);
     const card=mk('button','rounded-2xl min-h-40 p-3 flex flex-col justify-between text-left border border-white/10 shadow-lg');card.type='button';card.style.background=bg;
@@ -908,13 +1004,13 @@ function startAppListeners() {
   Object.keys(lastSeen).forEach(k=>delete lastSeen[k]);listenStories();listenChannels();listenPrivateRooms();listenContacts();
 }
 function stopAppListeners() {
-  ['stories','channels','privateRooms','messages','contacts'].forEach(stopListener);
+  ['stories','channels','privateRooms','messages','contacts','peer'].forEach(stopListener);
 }
 async function handleAuthState(user) {
   const generation=++appGeneration;
   currentUser=user;myUserData=null;
   if(!user) {
-    stopAppListeners();isDev=false;privateRoomCache=[];storyCache=[];channelCache=[];
+    stopAppListeners();stopPresence();isDev=false;privateRoomCache=[];storyCache=[];channelCache=[];
     closeRoom();showApp(false);$('connection-label').textContent='Belum masuk';
     return;
   }
@@ -932,7 +1028,7 @@ async function handleAuthState(user) {
       else {try{await user.sendEmailVerification();}catch(e){}toast('Mode developer butuh verifikasi email. Cek inbox '+DEV_EMAIL+', klik link-nya, lalu masuk ulang.',true);}
     }
     $('dev-panel').classList.toggle('hidden',!isDev);
-    startAppListeners();$('connection-label').textContent=isDev?'Mode developer':'Terhubung';
+    startAppListeners();startPresence();$('connection-label').textContent=isDev?'Mode developer':'Terhubung';
   } catch(err) {
     console.error(err);$('connection-label').textContent='Gagal memuat';
     if(err&&err.code==='permission-denied'){toast('Akses ditolak. Akun kamu mungkin diblokir.',true);try{await auth.signOut();}catch(e){}return;}
@@ -982,9 +1078,10 @@ function bindEvents() {
   $('status-file').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(!/^(image|video)\//.test(f.type))return toast('Pilih foto atau video.',true);setStatusMedia(f);});
   $('follow-room').addEventListener('click',()=>{const c=liveChannel();if(c&&!isChannelAdmin(c))followChannel(c,!isFollowing(c));});
   $('dev-users').addEventListener('click',openDevUsers);
+  [['priv-lastseen','privLastSeen'],['priv-status','privStatus'],['priv-profile','privProfile']].forEach(([id,f])=>$(id).addEventListener('change',e=>updateProfile(f,e.target.value)));
   $('dev-close').addEventListener('click',()=>$('dev-modal').classList.add('hidden'));
   $('dev-search').addEventListener('input',renderDevUsers);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden){unread=0;document.title='AETHER CHAT — Riixtz';}});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){unread=0;document.title='AETHER CHAT — Riixtz';pingPresence();markRead();}});
   if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
   initThemes();
   $('fab').addEventListener('click',()=>currentView==='status'?openStatusModal():addContact());
