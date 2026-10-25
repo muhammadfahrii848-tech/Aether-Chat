@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#100b1d">
-<title>AETHER CHAT — Riitzy</title>
+<title>AETHER CHAT — Riixtz</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Bricolage+Grotesque:wght@600;700;800&display=swap" rel="stylesheet">
@@ -65,6 +65,7 @@ h1,h2,.display{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif}
     <section id="view-chat" class="view p-4 space-y-4">
       <div class="flex gap-2">
         <input id="search-id" class="field min-w-0 flex-1 rounded-xl px-4 py-3 text-xs" inputmode="numeric" maxlength="8" placeholder="Cari teman pakai ID 8 digit">
+        <button id="add-contact-btn" type="button" aria-label="Tambah kontak" class="rounded-xl border border-purple-400/30 bg-purple-500/10 px-3.5 text-lg font-bold text-purple-200">+</button>
         <button id="search-id-btn" class="btn-primary rounded-xl px-4 text-xs font-bold">Cari ID</button>
       </div>
       <div class="panel p-3">
@@ -102,7 +103,7 @@ h1,h2,.display{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif}
     <!-- Profile -->
     <section id="view-profile" class="view hidden p-4 space-y-4">
       <div class="panel p-6 text-center">
-        <div id="profile-avatar" class="avatar w-20 h-20 rounded-full text-2xl mx-auto border-2 border-purple-300/70">?</div>
+        <div class="relative w-20 h-20 mx-auto"><div id="profile-avatar" class="avatar w-20 h-20 rounded-full text-2xl border-2 border-purple-300/70">?</div><button id="photo-btn" type="button" aria-label="Ganti foto profil" class="absolute -bottom-1 -right-1 w-8 h-8 rounded-full btn-primary grid place-items-center text-sm border-2 border-[#171121]">📷</button><input id="photo-input" type="file" accept="image/*" class="hidden"></div>
         <h2 id="profile-name" class="font-extrabold mt-3">Memuat profil…</h2>
         <div class="flex items-center justify-center gap-2 mt-2"><span id="profile-id" class="text-xs font-mono text-purple-300">ID: —</span><button id="copy-id" class="rounded-lg bg-purple-500/15 px-2 py-1 text-[10px] text-purple-200">Salin</button></div>
         <p id="profile-bio" class="text-xs muted mt-3">—</p>
@@ -111,7 +112,13 @@ h1,h2,.display{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif}
       <div class="space-y-2">
         <button id="edit-name" class="panel w-full p-4 text-left text-sm">✏️ <span class="ml-2 font-semibold">Ubah nama profil</span><span class="float-right muted">›</span></button>
         <button id="change-password" class="panel w-full p-4 text-left text-sm">🔒 <span class="ml-2 font-semibold">Ubah password</span><span class="float-right muted">›</span></button>
+        <button id="share-id" class="panel w-full p-4 text-left text-sm">🔗 <span class="ml-2 font-semibold">Bagikan kode unik</span><span class="float-right muted">›</span></button>
+        <div class="panel p-4 space-y-3"><h3 class="text-sm font-bold">Notifikasi</h3>
+          <label class="flex items-center justify-between text-sm"><span>Notifikasi pesan baru</span><input id="toggle-notif" type="checkbox" class="w-5 h-5 accent-purple-500"></label>
+          <label class="flex items-center justify-between text-sm"><span>Suara notifikasi</span><input id="toggle-sound" type="checkbox" class="w-5 h-5 accent-purple-500"></label>
+          <p id="notif-hint" class="text-[11px] muted"></p></div>
         <button id="logout-btn" class="panel w-full p-4 text-left text-sm border-red-400/20 text-red-300">↪ <span class="ml-2 font-semibold">Keluar akun</span></button>
+        <p class="text-center text-[10px] muted pt-2">Aether Chat v2</p>
       </div>
     </section>
   </main>
@@ -157,6 +164,15 @@ h1,h2,.display{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif}
   <p class="text-center text-[10px] text-white/60">Status akan kedaluwarsa setelah 24 jam</p>
 </div>
 
+<div id="ask-modal" class="hidden fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-3 bg-black/70 backdrop-blur-sm">
+  <form id="ask-form" novalidate class="w-full max-w-md rounded-3xl bg-[#171121] border border-white/10 p-5 space-y-4 shadow-2xl">
+    <div><h3 id="ask-title" class="display text-lg font-bold"></h3><p id="ask-desc" class="text-xs muted mt-1 hidden"></p></div>
+    <div id="ask-fields" class="space-y-3"></div>
+    <p id="ask-error" class="text-xs text-rose-300 min-h-[1rem]" role="alert"></p>
+    <div class="flex gap-2"><button type="button" id="ask-cancel" class="flex-1 rounded-xl py-3 text-sm bg-white/5 border border-white/10">Batal</button><button type="submit" id="ask-ok" class="flex-1 rounded-xl py-3 text-sm font-bold btn-primary">Simpan</button></div>
+  </form>
+</div>
+
 <!-- Firebase compat SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -198,21 +214,131 @@ const escapeError = err => {
 let auth=null, db=null, currentUser=null, myUserData=null;
 let authMode='login', currentView='chat', currentRoomID=null, currentRoomType='global';
 let currentRoomTitle='', currentTargetUid=null, selectedBg='violet', viewedStory=null, sending=false;
-let unsub={auth:null,stories:null,channels:null,privateRooms:null,messages:null};
+let unsub={auth:null,stories:null,channels:null,privateRooms:null,messages:null,contacts:null};
 let storyCache=[], channelCache=[], privateRoomCache=[];
 let activeFilter='all', appGeneration=0, currentChannelObj=null;
+const contactNames={},userCache={},userPending=new Set(),lastSeen={};
+const safePhoto=p=>typeof p==='string'&&p.length<60000&&/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(p)?p:'';
+const pref=(k,d)=>{try{const v=localStorage.getItem('aether-'+k);return v===null?d:v==='1';}catch(e){return d;}};
+const setPref=(k,v)=>{try{localStorage.setItem('aether-'+k,v?'1':'0');}catch(e){}};
+function paintAvatar(node,name,photo) {
+  const ph=safePhoto(photo);
+  node.textContent=ph?'':shortName(name);
+  node.style.backgroundImage=ph?'url("'+ph+'")':'';node.style.backgroundSize='cover';node.style.backgroundPosition='center';
+}
+function fetchUser(uid) {
+  if(!uid||!db||userCache[uid]||userPending.has(uid)) return;
+  userPending.add(uid);
+  db.collection('users').doc(uid).get().then(sn=>{if(sn.exists){userCache[uid]=sn.data()||{};renderPrivateRooms();if(currentRoomType==='private'&&currentTargetUid===uid)updateRoomChrome();}}).catch(()=>{}).finally(()=>userPending.delete(uid));
+}
+const personName=(uid,fallback)=>contactNames[uid]||(userCache[uid]&&userCache[uid].name)||fallback;
+function beep() {try{const A=window.AudioContext||window.webkitAudioContext,x=new A(),o=x.createOscillator(),g=x.createGain();o.frequency.value=880;g.gain.value=.05;o.connect(g);g.connect(x.destination);o.start();o.stop(x.currentTime+.12);setTimeout(()=>x.close(),300);}catch(e){}}
+function notifyNew(title,body) {
+  if(!pref('notif',true)) return;
+  toast(title+': '+body);
+  if(pref('sound',true)) beep();
+  if('Notification' in window&&Notification.permission==='granted'&&document.hidden){try{new Notification(title,{body});}catch(e){}}
+}
+function watchChanges(snap,labelFor) {
+  snap.docChanges().forEach(ch=>{
+    const d=ch.doc.data()||{}, ms=timestampMs(d.updatedAt), prev=lastSeen[ch.doc.id];
+    lastSeen[ch.doc.id]=ms;
+    if(prev===undefined||ms<=prev||!d.lastText||d.lastSenderUid===currentUser.uid) return;
+    if(currentRoomID===ch.doc.id&&!document.hidden) return;
+    notifyNew(labelFor(d),d.lastText);
+  });
+}
+async function askNotifPermission() {if('Notification' in window&&Notification.permission==='default'){try{await Notification.requestPermission();}catch(e){}}}
+function updateNotifHint() {
+  const h=$('notif-hint');
+  h.textContent=!('Notification' in window)?'Browser ini tidak mendukung notifikasi sistem. Notifikasi dalam aplikasi tetap muncul.':Notification.permission==='denied'?'Notifikasi diblokir di browser. Izinkan lewat pengaturan situs.':'Notifikasi muncul saat aplikasi terbuka, termasuk saat tab di latar belakang.';
+}
+function openForm({title,desc='',fields=[],confirmLabel='Simpan',danger=false}) {
+  return new Promise(resolve=>{
+    const modal=$('ask-modal'),box=$('ask-fields'),err=$('ask-error'),ok=$('ask-ok');
+    $('ask-title').textContent=title;const d=$('ask-desc');d.textContent=desc;d.classList.toggle('hidden',!desc);
+    ok.textContent=confirmLabel;ok.className='flex-1 rounded-xl py-3 text-sm font-bold text-white '+(danger?'bg-rose-600':'btn-primary');
+    err.textContent='';box.replaceChildren();
+    const els=fields.map(f=>{
+      const wrap=document.createElement('label');wrap.className='block';
+      const lab=document.createElement('span');lab.className='mini muted block mb-1 ml-1';lab.textContent=f.label;
+      const inp=document.createElement(f.multiline?'textarea':'input');
+      inp.className='field w-full rounded-xl px-4 py-3 text-sm'+(f.multiline?' resize-none':'');
+      if(f.multiline)inp.rows=3;else inp.type='text';
+      if(f.numeric){inp.inputMode='numeric';inp.addEventListener('input',()=>{inp.value=inp.value.replace(/\D/g,'');});}
+      inp.value=f.value||'';inp.maxLength=f.max||200;inp.placeholder=f.placeholder||'';
+      wrap.append(lab,inp);box.appendChild(wrap);
+      if(f.chips){const row=document.createElement('div');row.className='flex flex-wrap gap-1.5';f.chips.forEach(t=>{const b=document.createElement('button');b.type='button';b.className='rounded-full bg-white/5 border border-white/10 px-2.5 py-1 text-[11px]';b.textContent=t;b.addEventListener('click',()=>{inp.value=t;inp.focus();});row.appendChild(b);});box.appendChild(row);}
+      return {f,inp};
+    });
+    const finish=r=>{modal.classList.add('hidden');$('ask-form').onsubmit=null;$('ask-cancel').onclick=null;modal.onmousedown=null;modal.onkeydown=null;resolve(r);};
+    $('ask-form').onsubmit=e=>{
+      e.preventDefault();const out={};
+      for(const {f,inp} of els){
+        const v=inp.value.trim();
+        if(v.length<(f.min||0)){err.textContent=f.label+' minimal '+f.min+' karakter.';inp.focus();return;}
+        out[f.key]=v;
+      }
+      finish(out);
+    };
+    $('ask-cancel').onclick=()=>finish(null);
+    modal.onmousedown=e=>{if(e.target===modal)finish(null);};
+    modal.onkeydown=e=>{if(e.key==='Escape')finish(null);};
+    modal.classList.remove('hidden');
+    if(els[0]) setTimeout(()=>els[0].inp.focus(),30); else ok.focus();
+  });
+}
+function listenContacts() {
+  stopListener('contacts');
+  unsub.contacts=db.collection('users').doc(currentUser.uid).collection('contacts').onSnapshot(snap=>{
+    Object.keys(contactNames).forEach(k=>delete contactNames[k]);
+    snap.forEach(d=>{const n=safeText((d.data()||{}).name,'');if(n)contactNames[d.id]=n;});
+    renderPrivateRooms();if(currentRoomType==='private')updateRoomChrome();
+  },err=>{console.warn(err);toast('Kontak gagal dimuat. Pastikan rules Firestore sudah diperbarui.',true);});
+}
+async function addContact() {
+  const v=await openForm({title:'Tambah kontak',desc:'Isi nama dulu. Kode unik otomatis tersimpan bersama nama ini.',fields:[{key:'name',label:'Nama kontak',min:2,max:32,placeholder:'Mis. Budi'},{key:'id',label:'Kode unik (8 digit)',min:8,max:8,numeric:true,placeholder:'12345678'}],confirmLabel:'Simpan'});
+  if(!v) return;
+  if(v.id===myUserData.uniqueID) return toast('Itu kode unik kamu sendiri.',true);
+  try {
+    const snap=await db.collection('users').where('uniqueID','==',v.id).limit(1).get();
+    if(snap.empty) return toast('Kode unik tidak ditemukan.',true);
+    const t=snap.docs[0];
+    await db.collection('users').doc(currentUser.uid).collection('contacts').doc(t.id).set({name:v.name,uniqueID:v.id,uid:t.id,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    contactNames[t.id]=v.name;toast('Kontak "'+v.name+'" tersimpan.');
+    $('search-id').value=v.id;await searchFriend();
+  } catch(err){toast('Kontak gagal disimpan. '+escapeError(err),true);}
+}
+async function pickPhoto(file) {
+  if(!file) return;
+  if(!/^image\//.test(file.type)) return toast('Pilih file gambar.',true);
+  try {
+    const img=await new Promise((res,rej)=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{URL.revokeObjectURL(u);res(im);};im.onerror=()=>rej(new Error('Gambar tidak bisa dibaca.'));im.src=u;});
+    const size=192,c=document.createElement('canvas');c.width=c.height=size;
+    const m=Math.min(img.width,img.height);
+    c.getContext('2d').drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,size,size);
+    await updateProfile('photo',c.toDataURL('image/jpeg',0.8));
+  } catch(err){toast(escapeError(err),true);}
+}
+async function shareID() {
+  if(!myUserData||!myUserData.uniqueID) return;
+  const text='Chat sama aku di Aether Chat. Kode unik aku: '+myUserData.uniqueID;
+  if(navigator.share){try{await navigator.share({text});return;}catch(e){if(e&&e.name==='AbortError')return;}}
+  copyID();
+}
 const isChannelAdmin=c=>!!(c&&currentUser&&c.creatorUid===currentUser.uid);
 const liveChannel=()=>channelCache.find(c=>c.id===currentRoomID)||currentChannelObj;
 function updateRoomChrome() {
   const isCh=currentRoomType==='channel', c=isCh?liveChannel():null, admin=isCh&&isChannelAdmin(c);
   if(isCh){$('room-title').textContent=safeText(c&&c.name,'Saluran');$('room-subtitle').textContent=admin?'Kamu admin saluran ini':'Saluran dari '+safeText(c&&c.creator,'Pengguna');}
+  if(currentRoomType==='private') $('room-title').textContent=personName(currentTargetUid,currentRoomTitle);
   $('message-form').classList.toggle('hidden',isCh&&!admin);
   $('readonly-bar').classList.toggle('hidden',!isCh||admin);
   $('message-input').placeholder=isCh?'Tulis pesan untuk saluran…':'Tulis pesan…';
   const del=$('delete-room');del.classList.toggle('hidden',!(currentRoomType==='private'||admin));
   del.textContent=isCh?'Hapus saluran':'Hapus chat';
 }
-function openChannel(c) {currentChannelObj=c;openRoom(c.id,'channel',safeText(c.name,'Saluran'),'');}
+function openChannel(c) {currentChannelObj=c;Promise.resolve(openRoom(c.id,'channel',safeText(c.name,'Saluran'),'')).catch(err=>{console.error(err);toast('Saluran gagal dibuka: '+(err&&err.message?err.message:''),true);});}
 
 function toast(message, error=false) {
   const node=document.createElement('div');
@@ -284,12 +410,12 @@ async function ensureUserData(user, displayName='') {
 function renderProfile() {
   if(!myUserData) return;
   const name=safeText(myUserData.name,'Pengguna');
-  $('profile-avatar').textContent=shortName(name);
+  paintAvatar($('profile-avatar'),name,myUserData.photo);
   $('profile-name').textContent=name;
   $('profile-id').textContent='ID: '+safeText(myUserData.uniqueID,'—');
   $('profile-bio').textContent=safeText(myUserData.bio,'Pengguna Aether Chat');
   const strip=$('my-story-shortcut').querySelector('.avatar');
-  strip.textContent=shortName(name);
+  paintAvatar(strip,name,myUserData.photo);
 }
 async function authSubmit(e) {
   e.preventDefault();
@@ -355,7 +481,7 @@ function listenMessages(roomID,type) {
     if(type==='channel'){
       const c=liveChannel()||{}, intro=document.createElement('div');intro.className='chan-intro';
       const t=document.createElement('strong');t.className='text-sm display block';t.textContent=safeText(c.name,'Saluran');
-      const d=document.createElement('p');d.className='text-[11px] muted mt-1';d.textContent='Hanya admin saluran yang bisa mengirim pesan di sini.';
+      const d=document.createElement('p');d.className='text-[11px] muted mt-1 whitespace-pre-line';d.textContent=(c.description?c.description+'\n':'')+'Hanya admin saluran yang bisa mengirim pesan di sini.';
       intro.append(t,d);frag.appendChild(intro);
     }
     let prevUid=null,prevDay='',lastMine=false;
@@ -437,6 +563,7 @@ function listenPrivateRooms() {
   unsub.privateRooms=db.collection('private_rooms').where('users','array-contains',currentUser.uid).onSnapshot(snap=>{
     privateRoomCache=[];
     snap.forEach(doc=>privateRoomCache.push({id:doc.id,...doc.data()}));
+    watchChanges(snap,d=>{fetchUser(d.lastSenderUid);return personName(d.lastSenderUid,'Pesan baru');});
     renderPrivateRooms();
   },err=>{console.error(err);toast('Daftar chat pribadi gagal dimuat.',true);});
 }
@@ -445,9 +572,9 @@ function formatListTime(ts) {
   const d=ts.toDate(), n=new Date();
   return d.toDateString()===n.toDateString()?d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('id-ID',{day:'numeric',month:'short'});
 }
-function chatRow(avatarText,roundClass,name,metaNode,descText,onClick) {
+function chatRow(avatarText,roundClass,name,metaNode,descText,onClick,photo) {
   const btn=document.createElement('button');btn.type='button';btn.className='panel w-full p-3 flex items-center gap-3 text-left';
-  const av=document.createElement('span');av.className='avatar w-11 h-11 '+roundClass;av.textContent=shortName(avatarText);
+  const av=document.createElement('span');av.className='avatar w-11 h-11 '+roundClass;paintAvatar(av,avatarText,photo);
   const body=document.createElement('span');body.className='flex-1 min-w-0';
   const top=document.createElement('span');top.className='flex justify-between items-center gap-2';
   const nm=document.createElement('strong');nm.className='text-xs truncate';nm.textContent=name;top.append(nm,metaNode);
@@ -456,10 +583,10 @@ function chatRow(avatarText,roundClass,name,metaNode,descText,onClick) {
 }
 function metaText(t) {const n=document.createElement('span');n.className='text-[10px] muted shrink-0';n.textContent=t;return n;}
 function privateRow(r) {
-  const targetUid=r.users.find(uid=>uid!==currentUser.uid);
-  const name=safeText(r.userNames&&r.userNames[targetUid],'Teman');
+  const targetUid=r.users.find(uid=>uid!==currentUser.uid);fetchUser(targetUid);
+  const name=personName(targetUid,safeText(r.userNames&&r.userNames[targetUid],'Teman'));
   const desc=r.lastText?((r.lastSenderUid===currentUser.uid?'Kamu: ':'')+r.lastText):'Buka percakapan';
-  return chatRow(name,'rounded-full',name,metaText(formatListTime(r.updatedAt)),desc,()=>openRoom(r.id,'private',name,'Chat pribadi',targetUid));
+  return chatRow(name,'rounded-full',name,metaText(formatListTime(r.updatedAt)),desc,()=>openRoom(r.id,'private',name,'Chat pribadi',targetUid),userCache[targetUid]&&userCache[targetUid].photo);
 }
 function channelRow(c) {
   let meta;
@@ -551,7 +678,7 @@ async function deleteStatus() {
 function listenChannels() {
   stopListener('channels');
   unsub.channels=db.collection('channels').orderBy('createdAt','desc').limit(100).onSnapshot(snap=>{
-    channelCache=[];snap.forEach(doc=>channelCache.push({id:doc.id,...doc.data()}));renderChannels();renderPrivateRooms();if(currentRoomType==='channel'&&currentRoomID)updateRoomChrome();
+    channelCache=[];snap.forEach(doc=>channelCache.push({id:doc.id,...doc.data()}));watchChanges(snap,d=>safeText(d.name,'Saluran'));renderChannels();renderPrivateRooms();if(currentRoomType==='channel'&&currentRoomID)updateRoomChrome();
   },err=>{console.error(err);toast('Saluran gagal dimuat. '+escapeError(err),true);});
 }
 function renderChannels() {
@@ -560,29 +687,29 @@ function renderChannels() {
   channelCache.forEach(c=>box.appendChild(channelRow(c)));
 }
 async function createChannel() {
-  const name=prompt('Nama saluran (2–40 karakter):');
-  if(name===null)return;
-  const clean=name.trim();
-  if(clean.length<2||clean.length>40)return toast('Nama saluran harus 2–40 karakter.',true);
-  try {const ts=firebase.firestore.FieldValue.serverTimestamp();const data={name:clean,creator:safeText(myUserData.name,'Pengguna'),creatorUid:currentUser.uid,createdAt:ts,updatedAt:ts};const ref=await db.collection('channels').add(data);toast('Saluran berhasil dibuat.');openChannel({id:ref.id,...data});}
-  catch(err){toast('Saluran gagal dibuat. '+escapeError(err),true);}
+  const v=await openForm({title:'Buat saluran',desc:'Semua orang bisa membaca. Hanya kamu sebagai pembuat yang bisa mengirim pesan.',fields:[{key:'name',label:'Nama saluran',min:2,max:40,placeholder:'Mis. Info Kampus'},{key:'description',label:'Deskripsi (opsional)',max:120,multiline:true}],confirmLabel:'Buat saluran'});
+  if(!v) return;
+  try {
+    const ts=firebase.firestore.FieldValue.serverTimestamp();
+    const data={name:v.name,description:v.description,creator:safeText(myUserData.name,'Pengguna'),creatorUid:currentUser.uid,createdAt:ts,updatedAt:ts};
+    const ref=await db.collection('channels').add(data);
+    toast('Saluran berhasil dibuat.');openChannel({id:ref.id,...data});
+  } catch(err){toast('Saluran gagal dibuat. '+escapeError(err),true);}
 }
 async function updateProfile(field,value) {
   try {await db.collection('users').doc(currentUser.uid).update({[field]:value,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});myUserData[field]=value;renderProfile();toast('Profil diperbarui.');}
   catch(err){toast('Gagal memperbarui profil. '+escapeError(err),true);}
 }
 async function editName() {
-  const value=prompt('Nama profil (2–32 karakter):',safeText(myUserData.name,''));
-  if(value===null)return;const v=value.trim();
-  if(v.length<2||v.length>32)return toast('Nama harus 2–32 karakter.',true);
-  await updateProfile('name',v);
-  try { await currentUser.updateProfile({displayName:v}); } catch(e){}
+  const v=await openForm({title:'Nama profil',fields:[{key:'name',label:'Nama',value:safeText(myUserData.name,''),min:2,max:32}]});
+  if(!v) return;
+  await updateProfile('name',v.name);
+  try { await currentUser.updateProfile({displayName:v.name}); } catch(e){}
 }
 async function editBio() {
-  const value=prompt('Bio/status (maksimal 120 karakter):',safeText(myUserData.bio,''));
-  if(value===null)return;const v=value.trim();
-  if(v.length>120)return toast('Bio maksimal 120 karakter.',true);
-  await updateProfile('bio',v);
+  const v=await openForm({title:'Info',desc:'Tulis sendiri atau pilih status singkat.',fields:[{key:'bio',label:'Info',value:safeText(myUserData.bio,''),max:120,chips:['Tersedia','Sibuk','Di sekolah','Di kantor','Sedang di bioskop','Baterai hampir habis','Hanya bisa chat','Tidur']}]});
+  if(!v) return;
+  await updateProfile('bio',v.bio);
 }
 async function changePassword() {
   const value=prompt('Password baru (minimal 6 karakter):');
@@ -624,10 +751,10 @@ async function deleteCurrentRoom() {
 }
 function startAppListeners() {
   stopAllListeners();
-  listenStories();listenChannels();listenPrivateRooms();
+  Object.keys(lastSeen).forEach(k=>delete lastSeen[k]);listenStories();listenChannels();listenPrivateRooms();listenContacts();
 }
 function stopAppListeners() {
-  ['stories','channels','privateRooms','messages'].forEach(stopListener);
+  ['stories','channels','privateRooms','messages','contacts'].forEach(stopListener);
 }
 async function handleAuthState(user) {
   const generation=++appGeneration;
@@ -682,6 +809,14 @@ function bindEvents() {
   $('delete-room').addEventListener('click',deleteCurrentRoom);
   $('room-screen').addEventListener('keydown',e=>{if(e.key==='Escape')closeRoom();});
   $('status-viewer').addEventListener('click',e=>{if(e.target===$('status-viewer'))closeStatusViewer();});
+  $('add-contact-btn').addEventListener('click',addContact);
+  $('photo-btn').addEventListener('click',()=>$('photo-input').click());
+  $('photo-input').addEventListener('change',e=>{pickPhoto(e.target.files[0]);e.target.value='';});
+  $('share-id').addEventListener('click',shareID);
+  const tn=$('toggle-notif'),tsd=$('toggle-sound');tn.checked=pref('notif',true);tsd.checked=pref('sound',true);
+  tn.addEventListener('change',async()=>{setPref('notif',tn.checked);if(tn.checked)await askNotifPermission();updateNotifHint();});
+  tsd.addEventListener('change',()=>{setPref('sound',tsd.checked);if(tsd.checked)beep();});
+  updateNotifHint();
 }
 function startClock() {
   const update=()=>{$('clock').textContent=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});};
