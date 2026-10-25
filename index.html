@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#100b1d">
+<title>AETHER CHAT — Riixtz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Bricolage+Grotesque:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0b0812;--panel:#151020;--line:#ffffff12;--muted:#a69ab8;--purple:#9333ea}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#402064 0,transparent 42%),var(--bg);color:#f5f0ff;font-family:'Plus Jakarta Sans',sans-serif}button,input,textarea{font:inherit}button{touch-action:manipulation}button:disabled{opacity:.5;cursor:not-allowed}.glass{background:#171121df;border:1px solid var(--line);backdrop-filter:blur(18px)}.field{background:#ffffff08;border:1px solid #ffffff18;color:#fff;outline:none}.field:focus{border-color:#a855f7;box-shadow:0 0 0 3px #a855f722}.muted{color:var(--muted)}.scrollbar::-webkit-scrollbar{width:0;height:0}.tab.active{color:#d8b4fe;background:#a855f71c}.tab{color:#9589a8}.hidden{display:none!important}.toast{animation:pop .18s ease-out}@keyframes pop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}.bubble{overflow-wrap:anywhere;white-space:pre-wrap}.story-bg{background:linear-gradient(140deg,#6d28d9,#312e81)}.safe-bottom{padding-bottom:env(safe-area-inset-bottom)}.btn-primary{background:linear-gradient(135deg,#9333ea,#6d28d9)}.btn-primary:active{transform:scale(.98)}.avatar{display:grid;place-items:center;background:linear-gradient(135deg,#9333ea,#4338ca);font-weight:800;color:white;flex-shrink:0}.panel{background:#171121;border:1px solid #ffffff12;border-radius:22px}.mini{font-size:11px}.view{padding-bottom:94px}
+h1,h2,.display{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif}
+:focus-visible{outline:2px solid #c4b5fd;outline-offset:2px}
+#room-screen{height:100dvh;background:radial-gradient(ellipse at 50% -10%,#2a1748 0,transparent 50%),#0b0812}
+.panel{transition:border-color .15s,background .15s}.panel:hover{border-color:#a855f755;background:#1c1529}
+.avatar{box-shadow:inset 0 0 0 1px #ffffff22}
+.msg-mine{background:linear-gradient(135deg,#7c3aed,#5b21b6);border-radius:18px 18px 4px 18px;box-shadow:0 4px 14px #5b21b655}
+.msg-other{background:#211a31;border:1px solid #ffffff12;border-radius:18px 18px 18px 4px}
+.bubble .t{float:right;margin:9px 0 -3px 12px;font-size:10px;opacity:.6}
+.tab{position:relative}.tab.active::after{content:'';position:absolute;top:-8px;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:#a855f7}
+.badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;background:#fbbf2420;color:#fbbf24;flex-shrink:0}
+.day-sep,.chan-intro{margin-left:auto;margin-right:auto;width:fit-content}
+.day-sep{font-size:10px;padding:3px 10px;border-radius:99px;background:#ffffff0d;color:var(--muted)}
+.chan-intro{text-align:center;max-width:320px;padding:14px 16px;border-radius:18px;background:#ffffff08;border:1px solid #ffffff12}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="min-h-screen">
+<div id="toast-area" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-[92%] max-w-sm pointer-events-none"></div>
+
+<!-- Auth -->
+<section id="auth-screen" class="min-h-screen flex items-center justify-center p-4">
+  <div class="glass w-full max-w-md rounded-[28px] p-6 sm:p-8 shadow-2xl">
+    <div class="mx-auto mb-4 h-16 w-16 rounded-2xl btn-primary grid place-items-center shadow-lg shadow-purple-950/60">
+      <svg viewBox="0 0 24 24" class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H12l-5 4v-4h-.5A2.5 2.5 0 0 1 4 13.5z"/><path d="M8 8h8M8 11h5"/></svg>
+    </div>
+    <div class="text-center"><h1 class="text-2xl font-extrabold tracking-wide">AETHER CHAT</h1><p class="text-xs text-purple-300 mt-1 mb-6">Project Eksklusif Riixtz</p></div>
+    <div class="grid grid-cols-2 gap-1 p-1 rounded-xl bg-black/25 mb-5">
+      <button id="login-tab" class="rounded-lg py-2.5 text-sm font-semibold btn-primary" type="button">Masuk</button>
+      <button id="register-tab" class="rounded-lg py-2.5 text-sm font-semibold muted" type="button">Daftar akun</button>
+    </div>
+    <form id="auth-form" class="space-y-3">
+      <label id="name-wrap" class="hidden block"><span class="mini muted block mb-1 ml-1">Nama profil</span><input id="auth-name" class="field w-full rounded-xl px-4 py-3 text-sm" maxlength="32" autocomplete="nickname" placeholder="Nama kamu"></label>
+      <label class="block"><span class="mini muted block mb-1 ml-1">Email</span><input id="auth-email" class="field w-full rounded-xl px-4 py-3 text-sm" type="email" required maxlength="254" autocomplete="email" placeholder="nama@email.com"></label>
+      <label class="block"><span class="mini muted block mb-1 ml-1">Password</span><input id="auth-password" class="field w-full rounded-xl px-4 py-3 text-sm" type="password" required minlength="6" autocomplete="current-password" placeholder="Minimal 6 karakter"></label>
+      <button id="auth-submit" class="btn-primary w-full rounded-xl py-3.5 text-sm font-bold shadow-lg shadow-purple-950/40" type="submit">Masuk ke aplikasi</button>
+      <button id="reset-password" type="button" class="w-full py-2 text-xs text-purple-300">Lupa password?</button>
+    </form>
+    <p class="text-[10px] leading-relaxed muted text-center mt-4">Gunakan konfigurasi Firebase milik project kamu. Jangan bagikan password atau kredensial rahasia.</p>
+  </div>
+</section>
+
+<!-- App -->
+<div id="app-screen" class="hidden min-h-screen">
+  <header class="sticky top-0 z-30 border-b border-white/10 bg-[#0d0916]/90 backdrop-blur-xl">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3"><div class="avatar w-10 h-10 rounded-xl">A</div><div><h1 class="font-extrabold tracking-wide text-sm">AETHER <span class="text-purple-300">CHAT</span></h1><p id="connection-label" class="text-[10px] muted">Menghubungkan…</p></div></div>
+      <div id="clock" class="text-xs muted font-mono">--:--</div>
+    </div>
+  </header>
+  <main class="max-w-3xl mx-auto">
+    <!-- Chats -->
+    <section id="view-chat" class="view p-4 space-y-4">
+      <div class="flex gap-2">
+        <input id="search-id" class="field min-w-0 flex-1 rounded-xl px-4 py-3 text-xs" inputmode="numeric" maxlength="8" placeholder="Cari teman pakai ID 8 digit">
+        <button id="search-id-btn" class="btn-primary rounded-xl px-4 text-xs font-bold">Cari ID</button>
+      </div>
+      <div class="panel p-3">
+        <div class="flex items-center justify-between mb-3"><h2 class="text-sm font-bold">Pembaruan</h2><button id="create-status-shortcut" class="text-xs text-purple-300">+ Buat status</button></div>
+        <div id="story-strip" class="flex gap-3 overflow-x-auto scrollbar pb-1">
+          <button id="my-story-shortcut" class="min-w-[66px] text-center"><span class="avatar mx-auto w-14 h-14 rounded-full border-2 border-purple-400">+</span><span class="block text-[10px] mt-1">Status saya</span></button>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button class="filter-btn active px-3 py-2 rounded-xl text-xs font-semibold bg-purple-600/25 text-purple-200" data-filter="all">Semua</button>
+        <button class="filter-btn px-3 py-2 rounded-xl text-xs font-semibold bg-white/5 muted" data-filter="private">Pribadi</button>
+        <button class="filter-btn px-3 py-2 rounded-xl text-xs font-semibold bg-white/5 muted" data-filter="channel">Saluran</button>
+      </div>
+      <div id="chat-list" class="space-y-2">
+        <button id="global-chat-row" class="panel w-full p-3 flex items-center gap-3 text-left">
+          <span class="avatar w-11 h-11 rounded-full">🌐</span><span class="flex-1 min-w-0"><span class="flex justify-between gap-2"><strong class="text-xs">Global Chat Room</strong><span class="text-[10px] text-emerald-300">Publik</span></span><span class="block text-[11px] muted mt-1">Obrolan publik Aether Chat</span></span>
+        </button>
+        <div id="private-chat-list" class="space-y-2"></div>
+      </div>
+    </section>
+
+    <!-- Status and channels -->
+    <section id="view-status" class="view hidden p-4 space-y-5">
+      <div class="flex items-center justify-between"><h2 class="text-lg font-extrabold">Pembaruan</h2><button id="create-status-btn" class="btn-primary rounded-xl px-3 py-2 text-xs font-bold">+ Status</button></div>
+      <div id="status-cards" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+      <div class="flex items-center justify-between pt-2"><div><h2 class="font-bold">Saluran publik</h2><p class="text-[11px] muted">Saluran dari komunitas</p></div><button id="create-channel-btn" class="rounded-xl border border-purple-400/30 bg-purple-500/10 px-3 py-2 text-xs text-purple-200">+ Buat</button></div>
+      <div id="channels-list" class="space-y-2"></div>
+    </section>
+
+    <!-- Calls -->
+    <section id="view-calls" class="view hidden p-8 text-center">
+      <div class="panel p-8 mt-10"><div class="text-4xl mb-3">📞</div><h2 class="font-bold">Panggilan belum tersedia</h2><p class="text-xs muted mt-2">Fitur panggilan memerlukan layanan signaling dan WebRTC. Bagian ini belum diaktifkan.</p></div>
+    </section>
+
+    <!-- Profile -->
+    <section id="view-profile" class="view hidden p-4 space-y-4">
+      <div class="panel p-6 text-center">
+        <div id="profile-avatar" class="avatar w-20 h-20 rounded-full text-2xl mx-auto border-2 border-purple-300/70">?</div>
+        <h2 id="profile-name" class="font-extrabold mt-3">Memuat profil…</h2>
+        <div class="flex items-center justify-center gap-2 mt-2"><span id="profile-id" class="text-xs font-mono text-purple-300">ID: —</span><button id="copy-id" class="rounded-lg bg-purple-500/15 px-2 py-1 text-[10px] text-purple-200">Salin</button></div>
+        <p id="profile-bio" class="text-xs muted mt-3">—</p>
+        <button id="edit-bio" class="mt-4 rounded-xl bg-white/5 border border-white/10 px-4 py-2 text-xs">Ubah bio</button>
+      </div>
+      <div class="space-y-2">
+        <button id="edit-name" class="panel w-full p-4 text-left text-sm">✏️ <span class="ml-2 font-semibold">Ubah nama profil</span><span class="float-right muted">›</span></button>
+        <button id="change-password" class="panel w-full p-4 text-left text-sm">🔒 <span class="ml-2 font-semibold">Ubah password</span><span class="float-right muted">›</span></button>
+        <button id="logout-btn" class="panel w-full p-4 text-left text-sm border-red-400/20 text-red-300">↪ <span class="ml-2 font-semibold">Keluar akun</span></button>
+      </div>
+    </section>
+  </main>
+
+  <nav class="safe-bottom fixed bottom-0 inset-x-0 z-30 border-t border-white/10 bg-[#100b1b]/95 backdrop-blur-xl">
+    <div class="max-w-3xl mx-auto grid grid-cols-4 px-2 pt-2 pb-1">
+      <button class="tab active rounded-xl py-2 flex flex-col items-center gap-1" data-view="chat"><span>💬</span><span class="text-[10px] font-semibold">Chat</span></button>
+      <button class="tab rounded-xl py-2 flex flex-col items-center gap-1" data-view="status"><span>◉</span><span class="text-[10px] font-semibold">Pembaruan</span></button>
+      <button class="tab rounded-xl py-2 flex flex-col items-center gap-1" data-view="calls"><span>☎</span><span class="text-[10px] font-semibold">Panggilan</span></button>
+      <button class="tab rounded-xl py-2 flex flex-col items-center gap-1" data-view="profile"><span>👤</span><span class="text-[10px] font-semibold">Profil</span></button>
+    </div>
+  </nav>
+</div>
+
+<!-- Chat room -->
+<div id="room-screen" class="hidden fixed inset-0 z-50 bg-[#0b0812] flex flex-col">
+  <header class="border-b border-white/10 bg-[#130d20] p-3 flex items-center gap-3">
+    <button id="room-back" class="text-purple-300 font-bold px-2">←</button>
+    <div class="min-w-0 flex-1"><h2 id="room-title" class="text-sm font-bold truncate">Chat</h2><p id="room-subtitle" class="text-[10px] muted">—</p></div>
+    <button id="delete-room" class="hidden text-[10px] text-red-300 border border-red-400/20 rounded-lg px-2 py-1">Hapus chat</button>
+  </header>
+  <div id="room-messages" class="scrollbar flex-1 overflow-y-auto p-3 space-y-3"></div>
+  <form id="message-form" class="safe-bottom p-3 border-t border-white/10 bg-[#130d20] flex gap-2">
+    <input id="message-input" maxlength="2000" class="field min-w-0 flex-1 rounded-xl px-4 py-3 text-sm" placeholder="Tulis pesan…" autocomplete="off">
+    <button id="send-message" class="btn-primary rounded-xl px-4 text-xs font-bold">Kirim</button>
+  </form>
+  <div id="readonly-bar" class="hidden safe-bottom p-4 border-t border-white/10 bg-[#130d20] text-center text-xs muted">🔒 Hanya admin saluran yang bisa mengirim pesan.</div>
+</div>
+
+<!-- Create status modal -->
+<div id="status-modal" class="hidden fixed inset-0 z-[60] bg-[#090611]/95 p-4 flex flex-col">
+  <div class="flex items-center justify-between gap-3"><button id="status-cancel" class="text-sm muted">Batal</button><span class="text-xs font-bold text-purple-300">Buat status teks</span><button id="status-submit" class="btn-primary rounded-xl px-4 py-2 text-xs font-bold">Kirim</button></div>
+  <div id="status-preview" class="story-bg rounded-3xl flex-1 my-4 p-5 flex items-center justify-center"><textarea id="status-text" maxlength="500" class="bg-transparent w-full text-center text-2xl font-extrabold outline-none resize-none placeholder:text-white/50" placeholder="Apa yang sedang kamu pikirkan?"></textarea></div>
+  <div class="flex justify-center gap-3 pb-5">
+    <button class="w-9 h-9 rounded-full bg-violet-700 border-2 border-white" data-bg="violet"></button><button class="w-9 h-9 rounded-full bg-emerald-600 border-2 border-white" data-bg="green"></button><button class="w-9 h-9 rounded-full bg-rose-600 border-2 border-white" data-bg="rose"></button><button class="w-9 h-9 rounded-full bg-blue-600 border-2 border-white" data-bg="blue"></button><button class="w-9 h-9 rounded-full bg-amber-600 border-2 border-white" data-bg="amber"></button><button class="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-600 to-pink-600 border-2 border-white" data-bg="gradient"></button>
+  </div>
+</div>
+
+<!-- View status -->
+<div id="status-viewer" class="hidden fixed inset-0 z-[70] p-5 flex flex-col justify-between story-bg">
+  <div class="flex justify-between items-start gap-3"><div><p id="viewer-name" class="font-bold text-sm"></p><p id="viewer-time" class="text-[10px] text-white/70 mt-1"></p></div><div class="flex gap-2"><button id="viewer-delete" class="hidden rounded-lg bg-black/20 px-3 py-2 text-xs">Hapus</button><button id="viewer-close" class="rounded-lg bg-black/20 px-3 py-2 text-xs">✕</button></div></div>
+  <p id="viewer-text" class="text-center text-2xl font-extrabold whitespace-pre-wrap break-words"></p>
+  <p class="text-center text-[10px] text-white/60">Status akan kedaluwarsa setelah 24 jam</p>
+</div>
+
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script>
+'use strict';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCMiEKYuFCyAKTdrXs8vhx-Oje3CZcoqKo",
+  authDomain: "riixtz.firebaseapp.com",
+  projectId: "riixtz",
+  storageBucket: "riixtz.firebasestorage.app",
+  messagingSenderId: "740399119960",
+  appId: "1:740399119960:web:a6abf3e0b77b50ed4c942d"
+};
+
+const $ = id => document.getElementById(id);
+const safeText = (value, fallback='') => typeof value === 'string' ? value : fallback;
+const shortName = name => (safeText(name, 'U').trim().charAt(0) || 'U').toUpperCase();
+const escapeError = err => {
+  const code = err && err.code ? err.code : '';
+  const map = {
+    'auth/email-already-in-use':'Email ini sudah terdaftar.',
+    'auth/invalid-email':'Format email tidak valid.',
+    'auth/weak-password':'Password terlalu lemah (minimal 6 karakter).',
+    'auth/invalid-credential':'Email atau password salah.',
+    'auth/user-not-found':'Akun tidak ditemukan.',
+    'auth/wrong-password':'Email atau password salah.',
+    'auth/too-many-requests':'Terlalu banyak percobaan. Coba lagi nanti.',
+    'auth/requires-recent-login':'Demi keamanan, keluar lalu masuk kembali sebelum melakukan ini.',
+    'auth/network-request-failed':'Koneksi jaringan bermasalah. Periksa internet kamu.',
+    'permission-denied':'Akses ditolak aturan keamanan Firebase.',
+    'unavailable':'Firebase tidak tersedia. Periksa koneksi internet.',
+    'failed-precondition':'Operasi belum siap. Periksa konfigurasi/index Firestore.'
+  };
+  return map[code] || (err && err.message ? err.message : 'Terjadi kesalahan. Coba lagi.');
+};
+
+let auth=null, db=null, currentUser=null, myUserData=null;
+let authMode='login', currentView='chat', currentRoomID=null, currentRoomType='global';
+let currentRoomTitle='', currentTargetUid=null, selectedBg='violet', viewedStory=null, sending=false;
+let unsub={auth:null,stories:null,channels:null,privateRooms:null,messages:null};
+let storyCache=[], channelCache=[], privateRoomCache=[];
+let activeFilter='all', appGeneration=0, currentChannelObj=null;
+const isChannelAdmin=c=>!!(c&&currentUser&&c.creatorUid===currentUser.uid);
+const liveChannel=()=>channelCache.find(c=>c.id===currentRoomID)||currentChannelObj;
+function updateRoomChrome() {
+  const isCh=currentRoomType==='channel', c=isCh?liveChannel():null, admin=isCh&&isChannelAdmin(c);
+  if(isCh){$('room-title').textContent=safeText(c&&c.name,'Saluran');$('room-subtitle').textContent=admin?'Kamu admin saluran ini':'Saluran dari '+safeText(c&&c.creator,'Pengguna');}
+  $('message-form').classList.toggle('hidden',isCh&&!admin);
+  $('readonly-bar').classList.toggle('hidden',!isCh||admin);
+  $('message-input').placeholder=isCh?'Tulis pesan untuk saluran…':'Tulis pesan…';
+  const del=$('delete-room');del.classList.toggle('hidden',!(currentRoomType==='private'||admin));
+  del.textContent=isCh?'Hapus saluran':'Hapus chat';
+}
+function openChannel(c) {currentChannelObj=c;openRoom(c.id,'channel',safeText(c.name,'Saluran'),'');}
+
+function toast(message, error=false) {
+  const node=document.createElement('div');
+  node.className='toast mx-auto mb-2 rounded-xl border px-4 py-3 text-xs font-semibold shadow-xl '+(error?'bg-red-950 border-red-400/30 text-red-100':'bg-emerald-950 border-emerald-400/30 text-emerald-100');
+  node.textContent=(error?'⚠ ':'✓ ')+message;
+  $('toast-area').appendChild(node);
+  setTimeout(()=>node.remove(),3200);
+}
+function setBusy(button,busy,label) {
+  if (!button) return;
+  if (busy) {button.dataset.oldText=button.textContent;button.textContent=label||'Memproses…';button.disabled=true;}
+  else {button.textContent=button.dataset.oldText||button.textContent;button.disabled=false;}
+}
+function stopListener(key) { if (typeof unsub[key]==='function') { try{unsub[key]();}catch(e){console.warn(e);} } unsub[key]=null; }
+function stopAllListeners() { Object.keys(unsub).forEach(stopListener); }
+function setAuthMode(mode) {
+  authMode=mode;
+  $('login-tab').className='rounded-lg py-2.5 text-sm font-semibold '+(mode==='login'?'btn-primary':'muted');
+  $('register-tab').className='rounded-lg py-2.5 text-sm font-semibold '+(mode==='register'?'btn-primary':'muted');
+  $('name-wrap').classList.toggle('hidden',mode!=='register');
+  $('auth-name').required=mode==='register';
+  $('auth-password').autocomplete=mode==='register'?'new-password':'current-password';
+  $('auth-submit').textContent=mode==='register'?'Buat akun baru':'Masuk ke aplikasi';
+}
+function setView(view) {
+  currentView=view;
+  ['chat','status','calls','profile'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==view));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+  if(view==='status') renderStatuses();
+}
+function showApp(show) {
+  $('app-screen').classList.toggle('hidden',!show);
+  $('auth-screen').classList.toggle('hidden',show);
+}
+function firebaseReady() {
+  return firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('GANTI_') &&
+    firebaseConfig.appId && !firebaseConfig.appId.startsWith('GANTI_') &&
+    firebaseConfig.projectId && !firebaseConfig.projectId.startsWith('GANTI_');
+}
+async function findFreeID() {
+  for(let i=0;i<8;i++){
+    const id=String(Math.floor(10000000+Math.random()*90000000));
+    const snap=await db.collection('users').where('uniqueID','==',id).limit(1).get();
+    if(snap.empty) return id;
+  }
+  throw new Error('Tidak bisa membuat ID unik saat ini. Coba lagi.');
+}
+async function ensureUserData(user, displayName='') {
+  const ref=db.collection('users').doc(user.uid);
+  const snap=await ref.get();
+  if(snap.exists) {
+    const data=snap.data()||{};
+    if(!data.uniqueID) {
+      const uniqueID=await findFreeID();
+      await ref.set({uniqueID,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+      data.uniqueID=uniqueID;
+    }
+    myUserData={...data};
+  } else {
+    const uniqueID=await findFreeID();
+    const fallbackName = displayName || ((user.email||'pengguna').split('@')[0]).slice(0,32);
+    myUserData={uid:user.uid,name:fallbackName,email:user.email||'',uniqueID,bio:'Pengguna Aether Chat',createdAt:firebase.firestore.FieldValue.serverTimestamp()};
+    await ref.set(myUserData);
+    // Sinkronkan juga ke Firebase Auth profile
+    try { await user.updateProfile({ displayName: fallbackName }); } catch(e){ console.warn(e); }
+  }
+  renderProfile();
+}
+function renderProfile() {
+  if(!myUserData) return;
+  const name=safeText(myUserData.name,'Pengguna');
+  $('profile-avatar').textContent=shortName(name);
+  $('profile-name').textContent=name;
+  $('profile-id').textContent='ID: '+safeText(myUserData.uniqueID,'—');
+  $('profile-bio').textContent=safeText(myUserData.bio,'Pengguna Aether Chat');
+  const strip=$('my-story-shortcut').querySelector('.avatar');
+  strip.textContent=shortName(name);
+}
+async function authSubmit(e) {
+  e.preventDefault();
+  if(!auth) return toast('Firebase belum dikonfigurasi. Isi firebaseConfig dulu.',true);
+  const email=$('auth-email').value.trim();
+  const password=$('auth-password').value;
+  const name=$('auth-name').value.trim();
+  const btn=$('auth-submit'); setBusy(btn,true,'Memproses…');
+  try {
+    if(authMode==='register') {
+      if(name.length<2 || name.length>32) throw new Error('Nama profil harus 2–32 karakter.');
+      // Simpan pending name DULU sebelum create agar onAuthStateChanged bisa pakai
+      try { sessionStorage.setItem('aether-pending-name', name); } catch(e){}
+      await auth.createUserWithEmailAndPassword(email,password);
+      // handleAuthState akan memproses nama dari sessionStorage
+    } else {
+      await auth.signInWithEmailAndPassword(email,password);
+    }
+  } catch(err) {
+    try { sessionStorage.removeItem('aether-pending-name'); } catch(e){}
+    toast(escapeError(err),true);
+  }
+  finally {setBusy(btn,false);}
+}
+async function resetPassword() {
+  if(!auth) return toast('Firebase belum dikonfigurasi.',true);
+  const email=$('auth-email').value.trim();
+  if(!email) return toast('Isi email dulu untuk reset password.',true);
+  try {await auth.sendPasswordResetEmail(email);toast('Jika email terdaftar, instruksi reset akan dikirim.');}
+  catch(err){toast(escapeError(err),true);}
+}
+function roomRef(roomID,type) {
+  return type==='global'?db.collection('messages'):db.collection(type==='channel'?'channels':'private_rooms').doc(roomID).collection('messages');
+}
+async function openRoom(roomID,type,title,subtitle='',targetUid=null) {
+  if(!currentUser || !myUserData) return toast('Profil belum selesai dimuat.',true);
+  currentRoomID=roomID;currentRoomType=type;currentRoomTitle=title;currentTargetUid=targetUid;
+  $('room-title').textContent=title;
+  $('room-subtitle').textContent=subtitle||(type==='global'?'Obrolan publik':'Chat pribadi');
+  updateRoomChrome();
+  $('room-screen').classList.remove('hidden');
+  $('message-input').value='';
+  listenMessages(roomID,type);
+}
+function closeRoom() {
+  $('room-screen').classList.add('hidden');
+  stopListener('messages');
+  currentRoomID=null;currentTargetUid=null;currentChannelObj=null;
+}
+function dayLabel(ts) {
+  const d=ts&&ts.toDate?ts.toDate():new Date(), n=new Date();
+  const diff=Math.round((new Date(n.getFullYear(),n.getMonth(),n.getDate())-new Date(d.getFullYear(),d.getMonth(),d.getDate()))/864e5);
+  return diff===0?'Hari ini':diff===1?'Kemarin':d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+}
+function listenMessages(roomID,type) {
+  stopListener('messages');
+  const box=$('room-messages');box.replaceChildren();box.dataset.loaded='';
+  const query=roomRef(roomID,type).orderBy('timestamp','asc').limitToLast(200);
+  unsub.messages=query.onSnapshot(snap=>{
+    if(currentRoomID!==roomID) return;
+    const near=box.scrollHeight-box.scrollTop-box.clientHeight<140, first=box.dataset.loaded!=='1';
+    const frag=document.createDocumentFragment();
+    if(type==='channel'){
+      const c=liveChannel()||{}, intro=document.createElement('div');intro.className='chan-intro';
+      const t=document.createElement('strong');t.className='text-sm display block';t.textContent=safeText(c.name,'Saluran');
+      const d=document.createElement('p');d.className='text-[11px] muted mt-1';d.textContent='Hanya admin saluran yang bisa mengirim pesan di sini.';
+      intro.append(t,d);frag.appendChild(intro);
+    }
+    let prevUid=null,prevDay='',lastMine=false;
+    snap.forEach(doc=>{
+      const m=doc.data()||{}, mine=m.senderUid===currentUser.uid, day=dayLabel(m.timestamp);
+      if(day!==prevDay){const sep=document.createElement('div');sep.className='day-sep';sep.textContent=day;frag.appendChild(sep);prevDay=day;prevUid=null;}
+      const wrap=document.createElement('div');wrap.className='flex flex-col '+(mine?'items-end':'items-start');
+      if(!mine&&type!=='private'&&m.senderUid!==prevUid){const label=document.createElement('span');label.className='text-[10px] muted px-1 mb-1';label.textContent=safeText(m.senderName,'Pengguna');wrap.appendChild(label);}
+      const bubble=document.createElement('div');bubble.className='bubble max-w-[86%] px-3.5 py-2 text-sm '+(mine?'msg-mine text-white':'msg-other');
+      bubble.appendChild(document.createTextNode(safeText(m.text,'')));
+      const tm=document.createElement('span');tm.className='t';tm.textContent=formatTime(m.timestamp);bubble.appendChild(tm);
+      wrap.appendChild(bubble);frag.appendChild(wrap);prevUid=m.senderUid;lastMine=mine;
+    });
+    if(snap.empty){const e=document.createElement('p');e.className='text-xs muted text-center py-6';e.textContent=type==='channel'?'Belum ada pesan di saluran ini.':'Belum ada pesan. Mulai percakapan!';frag.appendChild(e);}
+    box.replaceChildren(frag);box.dataset.loaded='1';
+    if(first||near||lastMine) box.scrollTop=box.scrollHeight;
+  },err=>{console.error(err);toast('Gagal memuat pesan: '+escapeError(err),true);});
+}
+function formatTime(ts) {
+  if(!ts || typeof ts.toDate!=='function') return 'baru saja';
+  return ts.toDate().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+}
+async function sendMessage(e) {
+  e.preventDefault();
+  if(sending) return;
+  const text=$('message-input').value.trim();
+  if(!text || !currentUser || !myUserData || !currentRoomID) return;
+  if(currentRoomType==='channel'&&!isChannelAdmin(liveChannel())) return toast('Hanya admin saluran yang bisa mengirim pesan.',true);
+  sending=true;setBusy($('send-message'),true,'…');
+  try {
+    const data={text,senderUid:currentUser.uid,senderName:safeText(myUserData.name,'Pengguna'),timestamp:firebase.firestore.FieldValue.serverTimestamp()};
+    if(currentRoomType==='private') data.roomID=currentRoomID;
+    await roomRef(currentRoomID,currentRoomType).add(data);
+    if(currentRoomType!=='global') { try {await db.collection(currentRoomType==='channel'?'channels':'private_rooms').doc(currentRoomID).update({lastText:text.slice(0,80),lastSenderUid:currentUser.uid,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});} catch(e){console.warn(e);} }
+    $('message-input').value='';
+  } catch(err) {console.error(err);toast('Pesan gagal dikirim. '+escapeError(err),true);}
+  finally {sending=false;setBusy($('send-message'),false);}
+}
+async function searchFriend() {
+  const id=$('search-id').value.trim();
+  if(!/^\d{8}$/.test(id)) return toast('Masukkan ID yang terdiri dari 8 digit.',true);
+  if(!myUserData) return;
+  if(id===myUserData.uniqueID) return toast('Itu ID kamu sendiri.',true);
+  setBusy($('search-id-btn'),true,'Mencari…');
+  try {
+    const snap=await db.collection('users').where('uniqueID','==',id).limit(2).get();
+    if(snap.empty) return toast('ID pengguna tidak ditemukan.',true);
+    if(snap.size>1) return toast('ID ini duplikat. Admin perlu memperbaiki data akun.',true);
+    const targetDoc=snap.docs[0], target=targetDoc.data();
+    const pair=[currentUser.uid,targetDoc.id].sort();
+    const roomID=pair.join('_');
+    const ref=db.collection('private_rooms').doc(roomID);
+    const targetName = safeText(target.name,'Teman');
+    const myName = safeText(myUserData.name,'Pengguna');
+    await db.runTransaction(async tx=>{
+      const existing=await tx.get(ref);
+      if(!existing.exists) {
+        tx.set(ref,{
+          users:pair,
+          userNames:{[currentUser.uid]:myName,[targetDoc.id]:targetName},
+          createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } else {
+        // Update nama terbaru (kalau ada yang ganti nama)
+        tx.set(ref,{
+          userNames:{[currentUser.uid]:myName,[targetDoc.id]:targetName}
+        },{merge:true});
+      }
+    });
+    $('search-id').value='';
+    await openRoom(roomID,'private',targetName,'ID: '+id,targetDoc.id);
+  } catch(err) {console.error(err);toast('Gagal membuka chat. '+escapeError(err),true);}
+  finally {setBusy($('search-id-btn'),false);}
+}
+function listenPrivateRooms() {
+  stopListener('privateRooms');
+  if(!myUserData) return;
+  unsub.privateRooms=db.collection('private_rooms').where('users','array-contains',currentUser.uid).onSnapshot(snap=>{
+    privateRoomCache=[];
+    snap.forEach(doc=>privateRoomCache.push({id:doc.id,...doc.data()}));
+    renderPrivateRooms();
+  },err=>{console.error(err);toast('Daftar chat pribadi gagal dimuat.',true);});
+}
+function formatListTime(ts) {
+  if(!ts||typeof ts.toDate!=='function') return '';
+  const d=ts.toDate(), n=new Date();
+  return d.toDateString()===n.toDateString()?d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('id-ID',{day:'numeric',month:'short'});
+}
+function chatRow(avatarText,roundClass,name,metaNode,descText,onClick) {
+  const btn=document.createElement('button');btn.type='button';btn.className='panel w-full p-3 flex items-center gap-3 text-left';
+  const av=document.createElement('span');av.className='avatar w-11 h-11 '+roundClass;av.textContent=shortName(avatarText);
+  const body=document.createElement('span');body.className='flex-1 min-w-0';
+  const top=document.createElement('span');top.className='flex justify-between items-center gap-2';
+  const nm=document.createElement('strong');nm.className='text-xs truncate';nm.textContent=name;top.append(nm,metaNode);
+  const desc=document.createElement('span');desc.className='block text-[11px] muted mt-1 truncate';desc.textContent=descText;
+  body.append(top,desc);btn.append(av,body);btn.addEventListener('click',onClick);return btn;
+}
+function metaText(t) {const n=document.createElement('span');n.className='text-[10px] muted shrink-0';n.textContent=t;return n;}
+function privateRow(r) {
+  const targetUid=r.users.find(uid=>uid!==currentUser.uid);
+  const name=safeText(r.userNames&&r.userNames[targetUid],'Teman');
+  const desc=r.lastText?((r.lastSenderUid===currentUser.uid?'Kamu: ':'')+r.lastText):'Buka percakapan';
+  return chatRow(name,'rounded-full',name,metaText(formatListTime(r.updatedAt)),desc,()=>openRoom(r.id,'private',name,'Chat pribadi',targetUid));
+}
+function channelRow(c) {
+  let meta;
+  if(isChannelAdmin(c)) {meta=document.createElement('span');meta.className='badge';meta.textContent='Admin';}
+  else meta=metaText(formatListTime(c.updatedAt||c.createdAt));
+  const name=safeText(c.name,'Saluran');
+  return chatRow(name,'rounded-2xl',name,meta,c.lastText||('Saluran dari '+safeText(c.creator,'Pengguna')),()=>openChannel(c));
+}
+function renderPrivateRooms() {
+  const box=$('private-chat-list');box.replaceChildren();
+  const items=[];
+  if(activeFilter!=='channel') privateRoomCache.filter(r=>Array.isArray(r.users)&&r.users.includes(currentUser.uid)).forEach(r=>items.push({ms:timestampMs(r.updatedAt),build:()=>privateRow(r)}));
+  channelCache.filter(c=>activeFilter==='channel'||(activeFilter==='all'&&isChannelAdmin(c))).forEach(c=>items.push({ms:timestampMs(c.updatedAt||c.createdAt),build:()=>channelRow(c)}));
+  items.sort((a,b)=>b.ms-a.ms).forEach(i=>box.appendChild(i.build()));
+  $('global-chat-row').classList.toggle('hidden',activeFilter!=='all');
+  if(!items.length&&activeFilter!=='all') {
+    const empty=document.createElement('p');empty.className='text-xs muted text-center py-5';
+    empty.textContent=activeFilter==='channel'?'Belum ada saluran. Buat satu dari tab Pembaruan.':'Belum ada chat pribadi. Cari teman menggunakan ID.';box.appendChild(empty);
+  }
+}
+function timestampMs(ts) {try{return ts&&ts.toDate?ts.toDate().getTime():0;}catch(e){return 0;}}
+const bgClasses={violet:'linear-gradient(135deg,#6d28d9,#312e81)',green:'linear-gradient(135deg,#059669,#064e3b)',rose:'linear-gradient(135deg,#e11d48,#881337)',blue:'linear-gradient(135deg,#2563eb,#1e3a8a)',amber:'linear-gradient(135deg,#d97706,#78350f)',gradient:'linear-gradient(135deg,#4f46e5,#db2777)'};
+function applyStatusBg(key) {selectedBg=key;$('status-preview').style.background=bgClasses[key]||bgClasses.violet;}
+function openStatusModal() {$('status-modal').classList.remove('hidden');$('status-text').value='';applyStatusBg(selectedBg);}
+function closeStatusModal() {$('status-modal').classList.add('hidden');$('status-text').value='';}
+async function submitStatus() {
+  const text=$('status-text').value.trim();
+  if(!text) return toast('Tulis isi status dulu.',true);
+  if(text.length>500) return toast('Status maksimal 500 karakter.',true);
+  setBusy($('status-submit'),true,'Mengirim…');
+  try {
+    await db.collection('stories').add({text,bgKey:selectedBg,userName:safeText(myUserData.name,'Pengguna'),uid:currentUser.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp(),expiresAt:firebase.firestore.Timestamp.fromDate(new Date(Date.now()+24*60*60*1000))});
+    closeStatusModal();toast('Status berhasil dibuat.');
+  } catch(err) {console.error(err);toast('Status gagal dikirim. '+escapeError(err),true);}
+  finally {setBusy($('status-submit'),false);}
+}
+function listenStories() {
+  stopListener('stories');
+  unsub.stories=db.collection('stories').orderBy('createdAt','desc').limit(100).onSnapshot(snap=>{
+    const now=Date.now();storyCache=[];
+    snap.forEach(doc=>{
+      const s={id:doc.id,...doc.data()};
+      if(!s.expiresAt || timestampMs(s.expiresAt)>now) storyCache.push(s);
+    });
+    renderStatuses();
+  },err=>{console.error(err);toast('Status gagal dimuat. '+escapeError(err),true);});
+}
+function renderStatuses() {
+  const strip=$('story-strip'), cards=$('status-cards');
+  while(strip.children.length>1) strip.removeChild(strip.lastChild);
+  cards.replaceChildren();
+  storyCache.forEach(s=>{
+    const name=safeText(s.userName,'Pengguna'), bg=bgClasses[s.bgKey]||bgClasses.violet;
+    const small=document.createElement('button');small.className='min-w-[66px] text-center';
+    const av=document.createElement('span');av.className='mx-auto w-14 h-14 rounded-full border-2 border-purple-400 p-0.5 grid place-items-center font-bold';av.style.background=bg;av.textContent=shortName(name);
+    const label=document.createElement('span');label.className='block text-[10px] mt-1 max-w-[66px] truncate';label.textContent=name;
+    small.append(av,label);small.addEventListener('click',()=>viewStatus(s));strip.appendChild(small);
+    const card=document.createElement('button');card.className='rounded-2xl min-h-40 p-3 flex flex-col justify-between text-left border border-white/10 shadow-lg';card.style.background=bg;
+    const who=document.createElement('span');who.className='text-xs font-bold';who.textContent=name;
+    const content=document.createElement('span');content.className='text-sm font-bold line-clamp-4';content.textContent=safeText(s.text,'');
+    const time=document.createElement('span');time.className='text-[10px] text-white/70';time.textContent=formatRelative(s.createdAt);
+    card.append(who,content,time);card.addEventListener('click',()=>viewStatus(s));cards.appendChild(card);
+  });
+  if(!storyCache.length) {
+    const empty=document.createElement('p');empty.className='col-span-2 text-center text-xs muted py-6';empty.textContent='Belum ada status aktif.';cards.appendChild(empty);
+  }
+}
+function formatRelative(ts) {
+  const ms=timestampMs(ts);if(!ms)return 'Baru saja';
+  const mins=Math.max(0,Math.floor((Date.now()-ms)/60000));
+  return mins<1?'Baru saja':mins<60?mins+' menit lalu':Math.floor(mins/60)+' jam lalu';
+}
+function viewStatus(s) {
+  viewedStory=s;$('status-viewer').style.background=bgClasses[s.bgKey]||bgClasses.violet;
+  $('viewer-name').textContent=safeText(s.userName,'Pengguna');
+  $('viewer-time').textContent=formatRelative(s.createdAt);
+  $('viewer-text').textContent=safeText(s.text,'');
+  const own=currentUser&&s.uid===currentUser.uid;
+  $('viewer-delete').classList.toggle('hidden',!own);
+  $('status-viewer').classList.remove('hidden');
+}
+function closeStatusViewer() {$('status-viewer').classList.add('hidden');viewedStory=null;}
+async function deleteStatus() {
+  if(!viewedStory||viewedStory.uid!==currentUser.uid) return toast('Kamu hanya bisa menghapus status sendiri.',true);
+  if(!confirm('Hapus status ini?')) return;
+  try {await db.collection('stories').doc(viewedStory.id).delete();closeStatusViewer();toast('Status dihapus.');}
+  catch(err){toast('Gagal menghapus status. '+escapeError(err),true);}
+}
+function listenChannels() {
+  stopListener('channels');
+  unsub.channels=db.collection('channels').orderBy('createdAt','desc').limit(100).onSnapshot(snap=>{
+    channelCache=[];snap.forEach(doc=>channelCache.push({id:doc.id,...doc.data()}));renderChannels();renderPrivateRooms();if(currentRoomType==='channel'&&currentRoomID)updateRoomChrome();
+  },err=>{console.error(err);toast('Saluran gagal dimuat. '+escapeError(err),true);});
+}
+function renderChannels() {
+  const box=$('channels-list');box.replaceChildren();
+  if(!channelCache.length){const p=document.createElement('p');p.className='text-xs muted text-center py-5';p.textContent='Belum ada saluran. Kamu bisa membuat saluran baru.';box.appendChild(p);return;}
+  channelCache.forEach(c=>box.appendChild(channelRow(c)));
+}
+async function createChannel() {
+  const name=prompt('Nama saluran (2–40 karakter):');
+  if(name===null)return;
+  const clean=name.trim();
+  if(clean.length<2||clean.length>40)return toast('Nama saluran harus 2–40 karakter.',true);
+  try {const ts=firebase.firestore.FieldValue.serverTimestamp();const data={name:clean,creator:safeText(myUserData.name,'Pengguna'),creatorUid:currentUser.uid,createdAt:ts,updatedAt:ts};const ref=await db.collection('channels').add(data);toast('Saluran berhasil dibuat.');openChannel({id:ref.id,...data});}
+  catch(err){toast('Saluran gagal dibuat. '+escapeError(err),true);}
+}
+async function updateProfile(field,value) {
+  try {await db.collection('users').doc(currentUser.uid).update({[field]:value,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});myUserData[field]=value;renderProfile();toast('Profil diperbarui.');}
+  catch(err){toast('Gagal memperbarui profil. '+escapeError(err),true);}
+}
+async function editName() {
+  const value=prompt('Nama profil (2–32 karakter):',safeText(myUserData.name,''));
+  if(value===null)return;const v=value.trim();
+  if(v.length<2||v.length>32)return toast('Nama harus 2–32 karakter.',true);
+  await updateProfile('name',v);
+  try { await currentUser.updateProfile({displayName:v}); } catch(e){}
+}
+async function editBio() {
+  const value=prompt('Bio/status (maksimal 120 karakter):',safeText(myUserData.bio,''));
+  if(value===null)return;const v=value.trim();
+  if(v.length>120)return toast('Bio maksimal 120 karakter.',true);
+  await updateProfile('bio',v);
+}
+async function changePassword() {
+  const value=prompt('Password baru (minimal 6 karakter):');
+  if(value===null)return;if(value.length<6)return toast('Password minimal 6 karakter.',true);
+  try {await currentUser.updatePassword(value);toast('Password berhasil diubah.');}
+  catch(err){toast('Gagal mengubah password. '+escapeError(err),true);}
+}
+async function copyID() {
+  if(!myUserData||!myUserData.uniqueID)return;
+  try {
+    if(navigator.clipboard&&navigator.clipboard.writeText) await navigator.clipboard.writeText(myUserData.uniqueID);
+    else {const t=document.createElement('textarea');t.value=myUserData.uniqueID;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();}
+    toast('ID berhasil disalin.');
+  } catch(err){prompt('Salin ID ini:',myUserData.uniqueID);}
+}
+async function logout() {
+  if(!auth)return;
+  try {await auth.signOut();}catch(err){toast('Gagal logout. '+escapeError(err),true);}
+}
+async function purgeMessages(colRef) {
+  for(let i=0;i<50;i++){
+    const snap=await colRef.limit(400).get();
+    if(snap.empty) return;
+    const batch=db.batch();snap.docs.forEach(d=>batch.delete(d.ref));await batch.commit();
+    if(snap.size<400) return;
+  }
+}
+async function deleteCurrentRoom() {
+  if(!currentRoomID||currentRoomType==='global') return;
+  const isCh=currentRoomType==='channel';
+  if(isCh&&!isChannelAdmin(liveChannel())) return toast('Hanya admin yang bisa menghapus saluran.',true);
+  if(!confirm(isCh?'Hapus saluran ini beserta semua pesannya untuk semua orang?':'Hapus chat ini beserta semua pesannya? Lawan bicara juga kehilangan chat ini.')) return;
+  try {
+    const ref=db.collection(isCh?'channels':'private_rooms').doc(currentRoomID);
+    await purgeMessages(ref.collection('messages'));
+    await ref.delete();
+    closeRoom();toast(isCh?'Saluran dihapus.':'Chat dihapus.');
+  } catch(err){toast('Gagal menghapus. '+escapeError(err),true);}
+}
+function startAppListeners() {
+  stopAllListeners();
+  listenStories();listenChannels();listenPrivateRooms();
+}
+function stopAppListeners() {
+  ['stories','channels','privateRooms','messages'].forEach(stopListener);
+}
+async function handleAuthState(user) {
+  const generation=++appGeneration;
+  currentUser=user;myUserData=null;
+  if(!user) {
+    stopAppListeners();privateRoomCache=[];storyCache=[];channelCache=[];
+    closeRoom();showApp(false);$('connection-label').textContent='Belum masuk';
+    return;
+  }
+  showApp(true);$('connection-label').textContent='Memuat data…';
+  try {
+    let pendingName='';
+    try {pendingName=sessionStorage.getItem('aether-pending-name')||'';sessionStorage.removeItem('aether-pending-name');}catch(e){}
+    await ensureUserData(user,pendingName);
+    if(generation!==appGeneration||!currentUser||currentUser.uid!==user.uid)return;
+    startAppListeners();$('connection-label').textContent='Terhubung';
+  } catch(err) {
+    console.error(err);$('connection-label').textContent='Gagal memuat';
+    toast('Gagal memuat akun. '+escapeError(err),true);
+  }
+}
+function bindEvents() {
+  $('login-tab').addEventListener('click',()=>setAuthMode('login'));
+  $('register-tab').addEventListener('click',()=>setAuthMode('register'));
+  $('auth-form').addEventListener('submit',authSubmit);
+  $('reset-password').addEventListener('click',resetPassword);
+  $('search-id-btn').addEventListener('click',searchFriend);
+  $('search-id').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchFriend();}});
+  $('global-chat-row').addEventListener('click',()=>openRoom('global','global','Global Chat Room','Semua pengguna yang diizinkan dapat melihat pesan publik.'));
+  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+  document.querySelectorAll('.filter-btn').forEach(b=>b.addEventListener('click',()=>{
+    activeFilter=b.dataset.filter;
+    document.querySelectorAll('.filter-btn').forEach(x=>{const on=x===b;x.classList.toggle('active',on);x.classList.toggle('bg-purple-600/25',on);x.classList.toggle('text-purple-200',on);x.classList.toggle('bg-white/5',!on);x.classList.toggle('muted',!on);});
+    renderPrivateRooms();
+  }));
+  $('create-status-shortcut').addEventListener('click',openStatusModal);
+  $('my-story-shortcut').addEventListener('click',openStatusModal);
+  $('create-status-btn').addEventListener('click',openStatusModal);
+  $('status-cancel').addEventListener('click',closeStatusModal);
+  $('status-submit').addEventListener('click',submitStatus);
+  document.querySelectorAll('[data-bg]').forEach(b=>b.addEventListener('click',()=>applyStatusBg(b.dataset.bg)));
+  $('viewer-close').addEventListener('click',closeStatusViewer);
+  $('viewer-delete').addEventListener('click',deleteStatus);
+  $('create-channel-btn').addEventListener('click',createChannel);
+  $('edit-name').addEventListener('click',editName);
+  $('edit-bio').addEventListener('click',editBio);
+  $('change-password').addEventListener('click',changePassword);
+  $('copy-id').addEventListener('click',copyID);
+  $('logout-btn').addEventListener('click',logout);
+  $('room-back').addEventListener('click',closeRoom);
+  $('message-form').addEventListener('submit',sendMessage);
+  $('delete-room').addEventListener('click',deleteCurrentRoom);
+  $('room-screen').addEventListener('keydown',e=>{if(e.key==='Escape')closeRoom();});
+  $('status-viewer').addEventListener('click',e=>{if(e.target===$('status-viewer'))closeStatusViewer();});
+}
+function startClock() {
+  const update=()=>{$('clock').textContent=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});};
+  update();setInterval(update,15000);
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  bindEvents();startClock();setAuthMode('login');
+  if(!firebaseReady()) {
+    $('connection-label').textContent='Firebase perlu dikonfigurasi';
+    console.warn('Isi firebaseConfig dengan nilai asli Firebase Console sebelum digunakan.');
+    return;
+  }
+  try {
+    if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+    auth=firebase.auth();db=firebase.firestore();
+    auth.onAuthStateChanged(handleAuthState,err=>{console.error(err);toast('Status login gagal dibaca. '+escapeError(err),true);});
+  } catch(err) {console.error(err);toast('Firebase gagal diinisialisasi. Periksa konfigurasi.',true);}
+});
+</script>
+</body>
+</html>
